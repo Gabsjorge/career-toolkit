@@ -17,14 +17,15 @@ It is built around two constraints:
 4. [Folder layout](#folder-layout)
 5. [Configuration](#configuration)
 6. [Command reference](#command-reference)
-7. [Safety model](#safety-model)
-8. [Templates and judgment rules](#templates-and-judgment-rules)
-9. [State files and outputs](#state-files-and-outputs)
-10. [Troubleshooting](#troubleshooting)
-11. [Testing](#testing)
-12. [Before you push to a git remote](#before-you-push-to-a-git-remote)
-13. [Roadmap](#roadmap)
-14. [Known limits](#known-limits)
+7. [Evidence format](#evidence-format)
+8. [Safety model](#safety-model)
+9. [Templates and judgment rules](#templates-and-judgment-rules)
+10. [State files and outputs](#state-files-and-outputs)
+11. [Troubleshooting](#troubleshooting)
+12. [Testing](#testing)
+13. [Before you push to a git remote](#before-you-push-to-a-git-remote)
+14. [Roadmap](#roadmap)
+15. [Known limits](#known-limits)
 
 ## How it works
 
@@ -156,6 +157,7 @@ Every command is run as `python3 scripts/pipeline.py <command> ...` unless noted
 | `check-draft FILE` | Checks that every line of an evidence draft is a well-formed evidence item with no URLs, paths or code. Prints line numbers only. |
 | `mark-run STATE [--accept-gaps] [--accept-strays]` | Records the digest date in `last_run.json` so the next run is a delta. Refuses while there are open gaps or stray sensitive files, unless you pass the matching flag. |
 | `guard DIR [--blocklist FILE]` | Repo boundary check; see the Guard section at the end. Exit 1 on any violation. |
+| `assign-ids STATE` | Gives every evidence item in `evidence.md` that has no ID the next `E0001`-style ID. IDs never change and are never reused (the highest one is kept in `evidence-ids.json`). Takes `evidence.md.bak` first (mode 600; an older backup is never overwritten, a dated name is used instead). Idempotent. Prints counts only. |
 | `config-check` | Validates the user config (above). Prints `OK` or the problem; exit 1 on a problem. |
 | `gate refresh` | Exit 0 if `refresh-evidence` is allowed on this machine, else exit 1 with a message. |
 | `state-dir` | Prints `STATE` (`<career_folder>/state`) from the user config. |
@@ -180,6 +182,7 @@ Unknown flags are rejected (exit 64) so a typo such as `--ful` cannot silently r
 |--------|---------|
 | `render_pdf.py MD PDF [--css FILE]` | Markdown to PDF through `marked` and headless Chrome. Refuses Markdown containing script, iframe, object, embed, event-handler attributes or `javascript:`; locks the page down with a content security policy; removes its temp file. Run it in your own terminal. |
 | `config.py` | Library behind `config-check`, `gate` and `state-dir`: loads and validates the user config. |
+| `assign_ids.py` | Library and CLI behind `assign-ids`. |
 | `guard.py DIR [--blocklist FILE]` | Repo boundary check behind `guard`. |
 | `nda_scrub.py [--blocklist FILE] FILE...` | The scrub as a stand-alone tool (default blocklist `state/blocklist.txt`). |
 | `estimate.py DIR CAP PRICE` | The estimate as a stand-alone tool. |
@@ -211,6 +214,12 @@ What it cannot guarantee:
 - **Single-word names** ("Maria", "Jenkins") are not redacted automatically because they collide with tool names. Add the ones that matter to `blocklist.txt`.
 - A summarizing subagent can still read files on disk. The input cleaning, the prompt and `check-draft` limit what an injected instruction can plant in your materials; they do not stop a read.
 - Hand-written changes you make to outputs are scrubbed, but nothing can judge whether a sentence is true: the judgment rules below help, and you remain the reviewer.
+
+## Evidence format
+
+Each item is one line. Old format: `- **[high] 2026-09** — <text> _(tech: a, b)_`. New format, after `assign-ids`: `- **E0001** **[high] 2026-09** — <text> _(tech: a, b)_ _(tags: kafka, nestjs)_`. `check-draft` accepts both. It rejects a malformed or duplicate ID (`E` plus at least four digits) and a tag that is not lowercase or contains a space.
+
+Personal learning items such as courses and practice sites are not Evidence. A **Personal lab** (a public repo you approve) is allowed. Put it under a `## Personal labs` heading and add `_(kind: lab)_`. `check-draft` rejects a `kind: lab` item outside that heading and a normal item inside it.
 
 ## Templates and judgment rules
 

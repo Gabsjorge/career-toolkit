@@ -1,7 +1,7 @@
 import datetime, json, os, pathlib, shutil, sys, time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import estimate as est
-import config, draft_check, guard, harvest_git, harvest_prs, labels, nda_scrub, runlog, state
+import assign_ids, config, draft_check, guard, harvest_git, harvest_prs, labels, nda_scrub, runlog, state
 
 
 def _swap_in(dd, stage):
@@ -124,7 +124,7 @@ def _harvest_into(stage, cfg, pats, since, sd, pr_runner):
 
 ALLOWED_FLAGS = {"digest": {"--full"}, "mark-run": {"--accept-gaps", "--accept-strays"}}
 USAGE = ("usage: pipeline.py init|digest|estimate|scrub|mark-run|check-strays STATE [...] | check-draft FILE"
-         " | guard DIR [--blocklist FILE] | config-check | gate refresh | state-dir")
+         " | guard DIR [--blocklist FILE] | assign-ids STATE | config-check | gate refresh | state-dir")
 
 
 def main(argv):
@@ -142,6 +142,8 @@ def _main(argv):
     cmd, rest = argv[0], argv[1:]
     if cmd == "guard":
         return guard.main(rest)
+    if cmd == "assign-ids":
+        return assign_ids.main(rest)
     if cmd in ("config-check", "gate", "state-dir"):
         return config.main(cmd, rest)
     flags = [a for a in rest if a.startswith("--")]

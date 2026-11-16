@@ -2,8 +2,8 @@ import datetime, json, os, pathlib
 from typing import Optional
 
 IGNORE_ENTRIES = ["config.json", "blocklist.txt", "last_run.json", "notes.md",
-                  "digests/", "label-map.json", "evidence.md", "evidence-draft.md", "*.pdf", "*.bak", "*.log"]
-OPTIONAL_IGNORED = {"*.pdf", "*.bak", "*.log"}   # not required, so older state/.gitignore files keep working
+                  "digests/", "label-map.json", "evidence.md", "evidence-draft.md", "*.pdf", "*.bak", "*.log", "evidence-ids.json"]
+OPTIONAL_IGNORED = {"*.pdf", "*.bak", "*.log", "evidence-ids.json"}   # not required, so older state/.gitignore files keep working
 REQUIRED_IGNORED = [e for e in IGNORE_ENTRIES if e not in OPTIONAL_IGNORED]
 SENSITIVE_NAMES = {"blocklist.txt", "config.json", "label-map.json", "last_run.json",
                    "evidence.md", "evidence-draft.md"}

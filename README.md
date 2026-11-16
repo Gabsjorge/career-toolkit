@@ -10,7 +10,7 @@ Terms such as Offer, Evidence and Fit table are defined in [CONTEXT.md](CONTEXT.
 
 | Skill | State |
 |---|---|
-| `refresh-evidence` | moved in; see [docs/refresh-evidence.md](docs/refresh-evidence.md) |
+| `refresh-evidence` | available, with Evidence IDs and a machine gate; see [docs/refresh-evidence.md](docs/refresh-evidence.md) |
 | `tailor-offer` | planned |
 | `study-plan` | planned |
 | `search-offers` | reserved |
