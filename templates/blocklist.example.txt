@@ -1,0 +1,7 @@
+# Case-insensitive regexes, one per line. Copy to state/blocklist.txt and add your real terms.
+# Use \b word boundaries for short or common words (e.g. \bconta\b would not match "contact").
+\bacme-internal\b
+ticket://\d+
+ticket\s*#?\s*\d{5,}
+\b\d{8,9}\b
+\.corp\.example\.com

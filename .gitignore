@@ -1,0 +1,10 @@
+# Private data never belongs here. See docs/adr/0001-private-career-folder.md
+applications/*
+!applications/.gitkeep
+state/
+*.pdf
+*.bak
+*.log
+.DS_Store
+node_modules/
+__pycache__/

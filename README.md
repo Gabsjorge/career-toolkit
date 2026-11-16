@@ -1,0 +1,35 @@
+# career-toolkit
+
+Claude Code skills that help one person keep a CV and cover letter current, turn each job Offer into an Application (Fit table, tailored CV, cover letter), and keep a Study plan aligned with the market.
+
+It is also a portfolio piece: it shows AI used in a measured, safe way. Scripts do the extraction, counting and checking; a cheap model reads Offers; a stronger model writes wording; every claim in a CV traces to an Evidence ID.
+
+Terms such as Offer, Evidence and Fit table are defined in [CONTEXT.md](CONTEXT.md).
+
+## Status
+
+| Skill | State |
+|---|---|
+| `refresh-evidence` | moved in from `career-refresh`; see [docs/refresh-evidence.md](docs/refresh-evidence.md) |
+| `tailor-offer` | planned |
+| `study-plan` | planned |
+| `search-offers` | reserved |
+
+## The private-data rule
+
+This repo holds code, skills, templates and a fictional demo persona. It never holds a real CV, Evidence, Application, digest, config, blocklist or label map. The private Career folder lives elsewhere; its path comes from your own config ([ADR-0001](docs/adr/0001-private-career-folder.md)).
+
+`applications/` exists but stays empty. `.gitignore` enforces it, and `python3 scripts/pipeline.py guard .` fails if private files appear. CI runs the guard and the unit tests only: no secrets, no model calls.
+
+## Development
+
+```
+python3 -m unittest discover -s tests
+python3 scripts/pipeline.py guard .
+```
+
+Python 3 standard library only.
+
+## License
+
+MIT

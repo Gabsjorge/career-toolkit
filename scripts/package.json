@@ -1,0 +1,5 @@
+{
+  "name": "career-refresh-scripts",
+  "private": true,
+  "dependencies": { "marked": "^12.0.0" }
+}
