@@ -8,7 +8,7 @@ REQUIRED_IGNORED = [e for e in IGNORE_ENTRIES if e not in OPTIONAL_IGNORED]
 SENSITIVE_NAMES = {"blocklist.txt", "config.json", "label-map.json", "last_run.json",
                    "evidence.md", "evidence-draft.md"}
 SKIP_DIRS = {"node_modules", "__pycache__", ".git"}
-GITIGNORE_BODY = ("# career-refresh state: derived from confidential work. Never commit.\n"
+GITIGNORE_BODY = ("# career-toolkit state: derived from confidential work. Never commit.\n"
                   + "\n".join(IGNORE_ENTRIES) + "\n!config.example.json\n")
 EXAMPLE_CONFIG = {
     "authors": ["you@example.com"],

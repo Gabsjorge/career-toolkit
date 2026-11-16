@@ -1,11 +1,11 @@
 ---
-name: career-refresh
-description: Use when the user wants to refresh their CV, cover letter templates or LinkedIn text from recent work (yearly update). Token-frugal, NDA-safe workflow that digests git and GitHub activity with scripts, summarizes small digests on the cheapest model tier, and gates every output with a blocklist scrub.
+name: refresh-evidence
+description: Use when the user wants to refresh their Evidence, CV, cover letter templates or LinkedIn text from recent work (yearly update). Token-frugal, NDA-safe workflow that digests git and GitHub activity with scripts, summarizes small digests on the cheapest model tier, and gates every output with a blocklist scrub.
 ---
 
-# Career Refresh
+# Refresh Evidence
 
-Updates the user's career materials with minimal token spend. Scripts do all extraction; the model only summarizes small anonymized digests. `$SKILL_DIR` is this skill's directory. `STATE` is `state/` inside the user's career folder (ask for the career folder path once if unknown).
+Updates the user's Evidence, CV, cover letter templates and LinkedIn text with minimal token spend. Scripts do all extraction; the model only summarizes small anonymized digests. `${CLAUDE_PLUGIN_ROOT}` is the plugin root (scripts and templates live there). `STATE` is `state/` inside the user's career folder (ask for the career folder path once if unknown).
 
 ## Ground rules
 
@@ -20,7 +20,7 @@ Updates the user's career materials with minimal token spend. Scripts do all ext
 
 ## Stage 1: Config check
 
-1. If `STATE` does not exist: `python3 "$SKILL_DIR/scripts/pipeline.py" init STATE`. Then ask the user to copy `config.example.json` to `config.json` and fill in author emails, repo paths, GitHub hosts and a token cap, and to create `blocklist.txt` from `$SKILL_DIR/blocklist.example.txt` with their real NDA terms. Stop.
+1. If `STATE` does not exist: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" init STATE`. Then ask the user to copy `config.example.json` to `config.json` and fill in author emails, repo paths, GitHub hosts and a token cap, and to create `blocklist.txt` from `${CLAUDE_PLUGIN_ROOT}/templates/blocklist.example.txt` with their real NDA terms. Stop.
 2. If `STATE/last_run.json` exists the run is a delta; otherwise it is a full run. If the user passes `--full` (career changed a lot), treat it as full.
 
 ## Stage 2: Digest (no model tokens)
@@ -29,11 +29,11 @@ Stages 2 and 3 are the "dry run": they spend zero model tokens.
 
 A full first run may take several minutes because the GitHub search API is rate-limited; the script waits and retries automatically, so do not interrupt it.
 
-Run `python3 "$SKILL_DIR/scripts/pipeline.py" digest STATE [--full]`. It requires `STATE/blocklist.txt` with at least one valid pattern (an entry that does not compile or matches everything aborts the run, naming the entry number only), redacts every blocklist match in the digests as `[redacted]` before writing, writes small digests to `STATE/digests/` with neutral labels (`repo-1`, `reviews-1`), saves the report to `STATE/digests/.report.json` and prints it. Show the user the report's `written`, `skipped`, `gaps`, `redacted` and `suspect_dropped` (counts only; commit subjects that read like instructions are dropped). The run is staged: `repo-*.md` and `reviews-*.md` are replaced only if the whole run completes, the previous set is kept in `digests/.prev/`, and other files in `digests/` are left alone. Progress lines and a counts-only log are written to `STATE/run.log` (safe to read; it never holds names or text). In a delta run the review digest counts PRs "active in period" (opened or updated since the last run); that is an approximation, not an exact review count.
+Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" digest STATE [--full]`. It requires `STATE/blocklist.txt` with at least one valid pattern (an entry that does not compile or matches everything aborts the run, naming the entry number only), redacts every blocklist match in the digests as `[redacted]` before writing, writes small digests to `STATE/digests/` with neutral labels (`repo-1`, `reviews-1`), saves the report to `STATE/digests/.report.json` and prints it. Show the user the report's `written`, `skipped`, `gaps`, `redacted` and `suspect_dropped` (counts only; commit subjects that read like instructions are dropped). The run is staged: `repo-*.md` and `reviews-*.md` are replaced only if the whole run completes, the previous set is kept in `digests/.prev/`, and other files in `digests/` are left alone. Progress lines and a counts-only log are written to `STATE/run.log` (safe to read; it never holds names or text). In a delta run the review digest counts PRs "active in period" (opened or updated since the last run); that is an approximation, not an exact review count.
 
 ## Stage 3: Estimate (part of the dry run, no model tokens)
 
-Run `python3 "$SKILL_DIR/scripts/pipeline.py" estimate STATE`. Show the numbers. If it prints `no digests` on a delta run whose report has no `gaps`, nothing new happened since the last run: tell the user, make no model call, and offer `mark-run`. If it exits 2 because of the cap, stop and ask the user to raise the cap or trim the repo list. Do not make a model call without the user's go.
+Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" estimate STATE`. Show the numbers. If it prints `no digests` on a delta run whose report has no `gaps`, nothing new happened since the last run: tell the user, make no model call, and offer `mark-run`. If it exits 2 because of the cap, stop and ask the user to raise the cap or trim the repo list. Do not make a model call without the user's go.
 
 ## Stage 4: Summarize (cheapest tier)
 
@@ -41,15 +41,15 @@ Do NOT read the digests yourself. List the digest file paths (names only) and gr
 
 ## Stage 5: Scrub gate
 
-Write the merged candidate items to `STATE/evidence-draft.md`, then run `python3 "$SKILL_DIR/scripts/pipeline.py" check-draft STATE/evidence-draft.md` (every line must be a well-formed evidence item with no URLs, paths or code; it prints line numbers only) and then `python3 "$SKILL_DIR/scripts/nda_scrub.py" --blocklist STATE/blocklist.txt STATE/evidence-draft.md`. The scrub prints the file, line number and blocklist entry number only, never the term. On any hit from either check: stop, report that output, delete the draft (`rm STATE/evidence-draft.md`), write nothing else. When the scrub passes, promote the draft: merge it into `STATE/evidence.md` (see Stage 6) and then delete `STATE/evidence-draft.md`. Also flag anything that looks like a person, client or internal-system name and ask the user to rule on it before use.
+Write the merged candidate items to `STATE/evidence-draft.md`, then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" check-draft STATE/evidence-draft.md` (every line must be a well-formed evidence item with no URLs, paths or code; it prints line numbers only) and then `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nda_scrub.py" --blocklist STATE/blocklist.txt STATE/evidence-draft.md`. The scrub prints the file, line number and blocklist entry number only, never the term. On any hit from either check: stop, report that output, delete the draft (`rm STATE/evidence-draft.md`), write nothing else. When the scrub passes, promote the draft: merge it into `STATE/evidence.md` (see Stage 6) and then delete `STATE/evidence-draft.md`. Also flag anything that looks like a person, client or internal-system name and ask the user to rule on it before use.
 
 ## Stage 6: Merge and review
 
-Before a full run replaces `STATE/evidence.md`, back it up: `cp -p STATE/evidence.md STATE/evidence.md.bak && chmod 600 STATE/evidence.md.bak`. Append the scrubbed draft items to `STATE/evidence.md` (delta) or replace it (full), under dated headings, and add a Gaps section for failed sources. Ask the user to review. Apply their edits, then re-run the scrub on `STATE/evidence.md` (`python3 "$SKILL_DIR/scripts/pipeline.py" scrub STATE STATE/evidence.md`) and record lasting rulings in `STATE/notes.md`. After approval run `python3 "$SKILL_DIR/scripts/pipeline.py" mark-run STATE`. It checks `STATE` is git-ignored, refuses (exit 4) while sensitive-named files exist outside `STATE` (delete them, or `--accept-strays` only if the user knowingly keeps them) and refuses (exit 3, `open gaps: fix the failing sources, or re-run with --accept-gaps`) when `STATE/digests/.report.json` has non-empty `gaps`; fix the failing sources and re-run the digest, or pass `--accept-gaps` only if the user knowingly accepts the gap.
+Before a full run replaces `STATE/evidence.md`, back it up: `cp -p STATE/evidence.md STATE/evidence.md.bak && chmod 600 STATE/evidence.md.bak`. Append the scrubbed draft items to `STATE/evidence.md` (delta) or replace it (full), under dated headings, and add a Gaps section for failed sources. Ask the user to review. Apply their edits, then re-run the scrub on `STATE/evidence.md` (`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" scrub STATE STATE/evidence.md`) and record lasting rulings in `STATE/notes.md`. After approval run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" mark-run STATE`. It checks `STATE` is git-ignored, refuses (exit 4) while sensitive-named files exist outside `STATE` (delete them, or `--accept-strays` only if the user knowingly keeps them) and refuses (exit 3, `open gaps: fix the failing sources, or re-run with --accept-gaps`) when `STATE/digests/.report.json` has non-empty `gaps`; fix the failing sources and re-run the digest, or pass `--accept-gaps` only if the user knowingly accepts the gap.
 
 ## Stage 7: Propose edits
 
-Using the approved evidence, the existing CV and `$SKILL_DIR/templates/*.template.md` as skeletons, propose small edits to the CV (EN and PT), cover letter templates and LinkedIn text. Preserve wording the user already approved. Then run `python3 "$SKILL_DIR/scripts/pipeline.py" scrub STATE <each output file>`. Give the user this command to render PDFs in their own terminal: `python3 "$SKILL_DIR/scripts/render_pdf.py" cv-en.md cv-en.pdf` (first run needs `cd "$SKILL_DIR/scripts" && npm install`). The renderer refuses Markdown containing script, iframe, object, embed, event-handler attributes or `javascript:` links, and locks the page down with a content security policy. Ask them to check the layout.
+Using the approved evidence, the existing CV and `${CLAUDE_PLUGIN_ROOT}/templates/*.template.md` as skeletons, propose small edits to the CV (EN and PT), cover letter templates and LinkedIn text. Preserve wording the user already approved. Then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" scrub STATE <each output file>`. Give the user this command to render PDFs in their own terminal: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_pdf.py" cv-en.md cv-en.pdf` (first run needs `cd "${CLAUDE_PLUGIN_ROOT}/scripts" && npm install`). The renderer refuses Markdown containing script, iframe, object, embed, event-handler attributes or `javascript:` links, and locks the page down with a content security policy. Ask them to check the layout.
 
 ## Judgment rules
 

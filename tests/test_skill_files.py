@@ -13,7 +13,7 @@ class SkillFileTests(unittest.TestCase):
         self.skill = SKILL.read_text()
 
     def test_frontmatter(self):
-        m = re.match(r"---\nname: career-refresh\ndescription: (.+)\n---\n", self.skill)
+        m = re.match(r"---\nname: refresh-evidence\ndescription: (.+)\n---\n", self.skill)
         self.assertIsNotNone(m)
         self.assertGreater(len(m.group(1)), 40)
 

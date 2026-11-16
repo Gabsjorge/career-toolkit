@@ -1,4 +1,4 @@
-# career-refresh
+# refresh-evidence
 
 A Claude Code skill that refreshes your CV, cover-letter templates and LinkedIn text from your recent work, once a year or whenever you want.
 
@@ -57,32 +57,25 @@ The first run is a **full** run (all history). Later runs are **delta** runs tha
 
 ## Quick start
 
-1. Put this folder where Claude Code finds skills, for example `~/.claude/skills/career-refresh` (copy or symlink). Check your Claude Code docs if your version uses another location.
+1. Install this repository as a Claude Code plugin (or copy `skills/refresh-evidence` where your Claude Code finds skills). Check your Claude Code docs for the current install steps.
 2. Install the one JavaScript dependency:
    ```
-   cd career-refresh/scripts && npm install
+   cd career-toolkit/scripts && npm install
    ```
-3. Create the state folder (next to this folder, not inside it):
+3. Create the state folder (inside your private Career folder, never inside this repository):
    ```
-   python3 career-refresh/scripts/pipeline.py init state
+   python3 career-toolkit/scripts/pipeline.py init state
    ```
 4. Create `state/config.json` from `state/config.example.json` ([Configuration](#configuration)).
-5. Create `state/blocklist.txt` from `blocklist.example.txt` and put your real NDA terms in it.
-6. Ask Claude: "run career-refresh". It follows `SKILL.md` stage by stage and stops for your approval where needed.
+5. Create `state/blocklist.txt` from `templates/blocklist.example.txt` and put your real NDA terms in it.
+6. Ask Claude: "run refresh-evidence". It follows `SKILL.md` stage by stage and stops for your approval where needed.
 
 ## Folder layout
 
-`career-refresh/` is the repository. `state/` is a **sibling** of it and is never part of the repository.
+`career-toolkit/` is the repository. `state/` lives in your private Career folder and is never part of the repository.
 
 ```
 career/                       your career folder (not a repo)
-├── career-refresh/           THE REPO (this README lives here)
-│   ├── SKILL.md              instructions Claude follows
-│   ├── README.md
-│   ├── blocklist.example.txt example patterns, safe to commit
-│   ├── scripts/              all tools (below)
-│   ├── templates/            CV, cover letter, LinkedIn skeletons
-│   └── tests/                unittest suite
 ├── state/                    confidential, never commit
 │   ├── .gitignore            written by `init`
 │   ├── config.example.json   written by `init`
@@ -95,6 +88,13 @@ career/                       your career folder (not a repo)
 │   ├── last_run.json         created by `mark-run`
 │   └── run.log               created by `digest`
 ├── cv-en.md, cv-pt.md, ...   your outputs (outside the repo)
+
+career-toolkit/               THE REPO
+├── skills/refresh-evidence/SKILL.md   instructions Claude follows
+├── docs/refresh-evidence.md  this file
+├── templates/                blocklist example, CV, cover letter, LinkedIn skeletons
+├── scripts/                  all tools (below)
+└── tests/                    unittest suite
 ```
 
 Files you must create yourself:
@@ -124,7 +124,7 @@ A wrong type stops the run with a message naming the field (never its value).
 - Use `\b` word boundaries for short or common words, so `\bconta\b` does not match "contact".
 - An entry that does not compile, or that matches the empty string (a trailing `|`, `.*`), is rejected with its entry **number** (never its text). Fix it before digesting.
 - Colleague **first names** are not redacted automatically (see [Safety model](#safety-model)); add the ones that matter here.
-- `blocklist.example.txt` shows the format. Never put real terms in the example file: it is committed.
+- `templates/blocklist.example.txt` shows the format. Never put real terms in the example file: it is committed.
 
 ### `state/notes.md`
 
@@ -264,7 +264,7 @@ Run it from this folder. It uses only the standard library, temporary git reposi
 
 - [ ] `python3 scripts/pipeline.py check-strays ../state` prints `OK`.
 - [ ] `git status` shows no `state/`, `blocklist.txt`, `config.json`, `evidence*.md`, `*.pdf`, `*.bak` or `*.log` files.
-- [ ] `blocklist.example.txt` has example terms only.
+- [ ] `templates/blocklist.example.txt` has example terms only.
 - [ ] No real client, project, person or host names in tests, templates, comments or docs. Tests use made-up names.
 - [ ] Tests pass.
 
