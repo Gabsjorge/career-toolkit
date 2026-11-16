@@ -7,7 +7,7 @@ Prints counts only.
 import datetime, json, os, pathlib, re, shutil, sys
 
 HAS_ID = re.compile(r"^- \*\*E(\d{4,})\*\* ")
-NEEDS_ID = re.compile(r"^- (\*\*\[(?:high|med|low)\] )")
+NEEDS_ID = re.compile(r"^- (\*\*\[(?:high|med|low|user-stated)\] )")
 COUNTER = "evidence-ids.json"
 
 

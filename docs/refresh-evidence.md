@@ -157,7 +157,7 @@ Every command is run as `python3 scripts/pipeline.py <command> ...` unless noted
 | `check-draft FILE` | Checks that every line of an evidence draft is a well-formed evidence item with no URLs, paths or code. Prints line numbers only. |
 | `mark-run STATE [--accept-gaps] [--accept-strays]` | Records the digest date in `last_run.json` so the next run is a delta. Refuses while there are open gaps or stray sensitive files, unless you pass the matching flag. |
 | `guard DIR [--blocklist FILE]` | Repo boundary check; see the Guard section at the end. Exit 1 on any violation. |
-| `assign-ids STATE` | Gives every evidence item in `evidence.md` that has no ID the next `E0001`-style ID. IDs never change and are never reused (the highest one is kept in `evidence-ids.json`). Takes `evidence.md.bak` first (mode 600; an older backup is never overwritten, a dated name is used instead). Idempotent. Prints counts only. |
+| `assign-ids STATE` | Gives every evidence item in `evidence.md` that has no ID the next `E0001`-style ID. IDs never change and are never reused (the highest one is kept in `evidence-ids.json`). Takes `evidence.md.bak` first (mode 600; an older backup is never overwritten, a dated name is used instead). Idempotent. Prints counts only. Also numbers `[user-stated]` items you added by hand; `check-draft` stays strict (high, med, low only) because it guards model output. |
 | `config-check` | Validates the user config (above). Prints `OK` or the problem; exit 1 on a problem. |
 | `gate refresh` | Exit 0 if `refresh-evidence` is allowed on this machine, else exit 1 with a message. |
 | `state-dir` | Prints `STATE` (`<career_folder>/state`) from the user config. |

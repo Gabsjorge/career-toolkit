@@ -79,6 +79,13 @@ class AssignTests(unittest.TestCase):
         assign_ids.assign(sd)
         self.assertIn("**E0008** **[low] 2026-02**", (sd / "evidence.md").read_text())
 
+    def test_user_stated_items_get_ids(self):
+        sd = make_state("- **[user-stated] 2020-03 to 2021-09** — Led a team. Team of 3.\n- **[bogus] 2020-01** — Nope.\n")
+        self.assertEqual(assign_ids.assign(sd), 1)
+        text = (sd / "evidence.md").read_text()
+        self.assertIn("- **E0001** **[user-stated] 2020-03", text)
+        self.assertIn("- **[bogus]", text)
+
     def test_counter_file_holds_highest(self):
         sd = make_state()
         assign_ids.assign(sd)
