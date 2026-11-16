@@ -5,7 +5,7 @@ description: Use when the user wants to refresh their Evidence, CV, cover letter
 
 # Refresh Evidence
 
-Updates the user's Evidence, CV, cover letter templates and LinkedIn text with minimal token spend. Scripts do all extraction; the model only summarizes small anonymized digests. `${CLAUDE_PLUGIN_ROOT}` is the plugin root (scripts and templates live there). `STATE` is `state/` inside the user's career folder (ask for the career folder path once if unknown).
+Updates the user's Evidence, CV, cover letter templates and LinkedIn text with minimal token spend. Scripts do all extraction; the model only summarizes small anonymized digests. `${CLAUDE_PLUGIN_ROOT}` is the plugin root (scripts and templates live there). `STATE` is `<career_folder>/state`; get it from `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" state-dir` (it reads the user config). Never ask the user for the path.
 
 ## Ground rules
 
@@ -20,6 +20,7 @@ Updates the user's Evidence, CV, cover letter templates and LinkedIn text with m
 
 ## Stage 1: Config check
 
+0. Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" gate refresh`. If it exits non-zero, stop and show its message to the user. Do nothing else (no reading of repos, no digest). `config-check` explains a bad config.
 1. If `STATE` does not exist: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/pipeline.py" init STATE`. Then ask the user to copy `config.example.json` to `config.json` and fill in author emails, repo paths, GitHub hosts and a token cap, and to create `blocklist.txt` from `${CLAUDE_PLUGIN_ROOT}/templates/blocklist.example.txt` with their real NDA terms. Stop.
 2. If `STATE/last_run.json` exists the run is a delta; otherwise it is a full run. If the user passes `--full` (career changed a lot), treat it as full.
 

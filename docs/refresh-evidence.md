@@ -106,6 +106,19 @@ Files you must create yourself:
 
 ## Configuration
 
+### User config (outside the repo)
+
+A file at `~/.config/career-toolkit/config.json`, or at the path in the environment variable `CAREER_TOOLKIT_CONFIG`. Copy `templates/config.example.json` and edit it. It points to your private Career folder, so it never goes in this repository.
+
+| Field | Type | Default | Meaning |
+|-------|------|---------|---------|
+| `career_folder` | string | required | Path to your private Career folder. Must exist. `STATE` is `<career_folder>/state`. |
+| `machine` | `"client"` or `"personal"` | required | `client` turns `refresh-evidence` off until you opt in. `tailor-offer` and `study-plan` work on both. |
+| `refresh_enabled` | true or false | `false` on `client`, `true` on `personal` | Set `true` on a client machine only if your client allows reading its git history. |
+| `languages` | non-empty list of strings | `["en", "pt"]` | Languages for CVs and letters. |
+
+A bad value stops with a message naming the field, never its value or a path. `config-check` prints `OK` or the problem. `gate refresh` exits 0 when `refresh-evidence` may run and exits 1 with a plain message when it may not. `state-dir` prints `STATE`.
+
 ### `state/config.json`
 
 | Field | Type | Default | Meaning |
@@ -143,6 +156,9 @@ Every command is run as `python3 scripts/pipeline.py <command> ...` unless noted
 | `check-draft FILE` | Checks that every line of an evidence draft is a well-formed evidence item with no URLs, paths or code. Prints line numbers only. |
 | `mark-run STATE [--accept-gaps] [--accept-strays]` | Records the digest date in `last_run.json` so the next run is a delta. Refuses while there are open gaps or stray sensitive files, unless you pass the matching flag. |
 | `guard DIR [--blocklist FILE]` | Repo boundary check; see the Guard section at the end. Exit 1 on any violation. |
+| `config-check` | Validates the user config (above). Prints `OK` or the problem; exit 1 on a problem. |
+| `gate refresh` | Exit 0 if `refresh-evidence` is allowed on this machine, else exit 1 with a message. |
+| `state-dir` | Prints `STATE` (`<career_folder>/state`) from the user config. |
 | `check-strays STATE` | Lists sensitive-named files (blocklist, config, evidence...) found outside `STATE`. |
 
 Unknown flags are rejected (exit 64) so a typo such as `--ful` cannot silently run the wrong scope.
@@ -163,6 +179,7 @@ Unknown flags are rejected (exit 64) so a typo such as `--ful` cannot silently r
 | Script | Purpose |
 |--------|---------|
 | `render_pdf.py MD PDF [--css FILE]` | Markdown to PDF through `marked` and headless Chrome. Refuses Markdown containing script, iframe, object, embed, event-handler attributes or `javascript:`; locks the page down with a content security policy; removes its temp file. Run it in your own terminal. |
+| `config.py` | Library behind `config-check`, `gate` and `state-dir`: loads and validates the user config. |
 | `guard.py DIR [--blocklist FILE]` | Repo boundary check behind `guard`. |
 | `nda_scrub.py [--blocklist FILE] FILE...` | The scrub as a stand-alone tool (default blocklist `state/blocklist.txt`). |
 | `estimate.py DIR CAP PRICE` | The estimate as a stand-alone tool. |
