@@ -26,6 +26,11 @@ class TailorSkillTests(unittest.TestCase):
                        "stack gap", "cheapest tier", "never set Status", "personal lab", "scrub"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 
+    def test_untagged_evidence_does_not_stop_the_skill(self):
+        for needle in ["Evidence without tags is expected", "Do not pause",
+                       "never edit `STATE/evidence.md`", "Do not hand-set Status"]:
+            self.assertIn(needle, SKILL, needle)
+
     def test_never_asks_for_paths_or_reads_private_files(self):
         self.assertIn("Never read, print or summarize `STATE/config.json`", SKILL)
 
