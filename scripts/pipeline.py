@@ -1,7 +1,7 @@
 import datetime, json, os, pathlib, shutil, sys, time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import estimate as est
-import assign_ids, bullets_check, config, draft_check, fit_status, guard, lang_detect, tags, harvest_git, harvest_prs, labels, nda_scrub, runlog, state
+import assign_ids, tag_evidence, bullets_check, config, draft_check, fit_status, guard, lang_detect, tags, harvest_git, harvest_prs, labels, nda_scrub, runlog, state
 
 
 def _swap_in(dd, stage):
@@ -124,7 +124,7 @@ def _harvest_into(stage, cfg, pats, since, sd, pr_runner):
 
 ALLOWED_FLAGS = {"digest": {"--full"}, "mark-run": {"--accept-gaps", "--accept-strays"}}
 USAGE = ("usage: pipeline.py init|digest|estimate|scrub|mark-run|check-strays STATE [...] | check-draft FILE"
-         " | guard DIR [--blocklist FILE] | assign-ids STATE | tags-check TAGS REQS | fit-status FIT EVIDENCE TAGS [--relations F] [--check] | bullets-check CV EVIDENCE | detect-lang FILE | estimate-files CAP PRICE FILE... | config-check | gate refresh | state-dir")
+         " | guard DIR [--blocklist FILE] | assign-ids STATE | tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE] | tags-check TAGS REQS | fit-status FIT EVIDENCE TAGS [--relations F] [--check] | bullets-check CV EVIDENCE | detect-lang FILE | estimate-files CAP PRICE FILE... | config-check | gate refresh | state-dir")
 
 
 def main(argv):
@@ -146,6 +146,8 @@ def _main(argv):
               "detect-lang": lang_detect.main, "estimate-files": est.main_files}
     if cmd in simple:
         return simple[cmd](rest)
+    if cmd == "tag-evidence":
+        return tag_evidence.main(rest)
     if cmd == "assign-ids":
         return assign_ids.main(rest)
     if cmd in ("config-check", "gate", "state-dir"):

@@ -158,6 +158,7 @@ Every command is run as `python3 scripts/pipeline.py <command> ...` unless noted
 | `mark-run STATE [--accept-gaps] [--accept-strays]` | Records the digest date in `last_run.json` so the next run is a delta. Refuses while there are open gaps or stray sensitive files, unless you pass the matching flag. |
 | `guard DIR [--blocklist FILE]` | Repo boundary check; see the Guard section at the end. Exit 1 on any violation. |
 | `assign-ids STATE` | Gives every evidence item in `evidence.md` that has no ID the next `E0001`-style ID. IDs never change and are never reused (the highest one is kept in `evidence-ids.json`). Takes `evidence.md.bak` first (mode 600; an older backup is never overwritten, a dated name is used instead). Idempotent. Prints counts only. Also numbers `[user-stated]` items you added by hand; `check-draft` stays strict (high, med, low only) because it guards model output. |
+| `tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE]` | Adds `_(tags: a, b)_` after the `_(tech: ...)_` field of every item that has an ID but no tags field. Without `--apply` it is a dry run: nothing is written and it prints counts only (items, already tagged, pass 1, pending). **Pass 1** (no model) maps each tech name through the tag list and its aliases; an item is tagged only when all its tech names map. **Pending** items (unmapped tech, or no tech) are never guessed. `--pending OUT` writes them to a mode-600 JSON file for a cheap-model subagent. `--proposals FILE` takes `{"E0001": ["tag"]}` from that subagent; every tag must already be in the tag list, so a new tag is added there by the user first, and an item with an unknown tag is left alone (exit 1 names the tag). Never changes text, an ID or an existing tags field. Takes `evidence.md.bak` first (same rule as `assign-ids`). Idempotent. A `kind: lab` item keeps its marker and its place under `## Personal labs`. |
 | `config-check` | Validates the user config (above). Prints `OK` or the problem; exit 1 on a problem. |
 | `gate refresh` | Exit 0 if `refresh-evidence` is allowed on this machine, else exit 1 with a message. |
 | `state-dir` | Prints `STATE` (`<career_folder>/state`) from the user config. |
@@ -184,6 +185,7 @@ Unknown flags are rejected (exit 64) so a typo such as `--ful` cannot silently r
 | `check_commit_msg.py` | Contributor tooling: Conventional Commits check behind `.githooks/commit-msg` and CI. Not part of the skill. |
 | `config.py` | Library behind `config-check`, `gate` and `state-dir`: loads and validates the user config. |
 | `assign_ids.py` | Library and CLI behind `assign-ids`. |
+| `tag_evidence.py` | Library and CLI behind `tag-evidence`. |
 | `guard.py DIR [--blocklist FILE]` | Repo boundary check behind `guard`. |
 | `nda_scrub.py [--blocklist FILE] FILE...` | The scrub as a stand-alone tool (default blocklist `state/blocklist.txt`). |
 | `estimate.py DIR CAP PRICE` | The estimate as a stand-alone tool. |
