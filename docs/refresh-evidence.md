@@ -181,6 +181,7 @@ Unknown flags are rejected (exit 64) so a typo such as `--ful` cannot silently r
 | Script | Purpose |
 |--------|---------|
 | `render_pdf.py MD PDF [--css FILE]` | Markdown to PDF through `marked` and headless Chrome. Refuses Markdown containing script, iframe, object, embed, event-handler attributes or `javascript:`; locks the page down with a content security policy; removes its temp file. Run it in your own terminal. |
+| `check_commit_msg.py` | Contributor tooling: Conventional Commits check behind `.githooks/commit-msg` and CI. Not part of the skill. |
 | `config.py` | Library behind `config-check`, `gate` and `state-dir`: loads and validates the user config. |
 | `assign_ids.py` | Library and CLI behind `assign-ids`. |
 | `guard.py DIR [--blocklist FILE]` | Repo boundary check behind `guard`. |

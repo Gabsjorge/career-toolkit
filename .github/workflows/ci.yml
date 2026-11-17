@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -14,3 +16,5 @@ jobs:
         run: python3 -m unittest discover -s tests
       - name: Boundary guard
         run: python3 scripts/pipeline.py guard .
+      - name: Conventional Commits
+        run: python3 scripts/check_commit_msg.py --range HEAD

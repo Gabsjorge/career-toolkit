@@ -33,3 +33,13 @@ Python 3 standard library only.
 ## License
 
 MIT
+
+## Contributing
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`feat(scope): description`). Enable the check once per clone:
+
+```
+git config --local core.hooksPath .githooks
+```
+
+CI runs the same check on every commit.

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Enforces Conventional Commits. Enable once per clone: git config --local core.hooksPath .githooks
+exec python3 "$(git rev-parse --show-toplevel)/scripts/check_commit_msg.py" "$1"
