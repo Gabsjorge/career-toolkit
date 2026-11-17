@@ -11,7 +11,7 @@ Terms such as Offer, Evidence and Fit table are defined in [CONTEXT.md](CONTEXT.
 | Skill | State |
 |---|---|
 | `refresh-evidence` | available, with Evidence IDs and a machine gate; see [docs/refresh-evidence.md](docs/refresh-evidence.md) |
-| `tailor-offer` | planned |
+| `tailor-offer` | available; see [docs/tailor-offer.md](docs/tailor-offer.md) and the demo in [examples/persona](examples/persona) |
 | `study-plan` | planned |
 | `search-offers` | reserved |
 

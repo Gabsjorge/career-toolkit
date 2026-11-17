@@ -1,0 +1,10 @@
+[
+  {"requirement": "TypeScript", "tag": "typescript", "priority": "must"},
+  {"requirement": "NestJS services", "tag": "nestjs", "priority": "must"},
+  {"requirement": "Kafka or a similar message broker", "tag": "kafka", "priority": "must"},
+  {"requirement": "Solid PostgreSQL skills", "tag": "postgresql", "priority": "must"},
+  {"requirement": "Kubernetes experience in production", "tag": "kubernetes", "priority": "must"},
+  {"requirement": "Terraform", "tag": "terraform", "priority": "nice"},
+  {"requirement": "Redis", "tag": "redis", "priority": "nice"},
+  {"requirement": "Mentoring other engineers", "tag": "mentoring", "priority": "nice"}
+]

@@ -2,6 +2,7 @@ import pathlib, re, sys, unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKILL = ROOT / "skills" / "refresh-evidence" / "SKILL.md"
 DOC = ROOT / "docs" / "refresh-evidence.md"
+ALL_DOCS = [DOC, ROOT / "docs" / "tailor-offer.md"]
 sys.path.insert(0, str(ROOT / "scripts"))
 import nda_scrub
 
@@ -36,9 +37,9 @@ class SkillFileTests(unittest.TestCase):
                         self.skill.index("nda_scrub.py\" --blocklist STATE/blocklist.txt STATE/evidence-draft.md"))
 
     def test_readme_documents_every_command_and_script(self):
-        readme = DOC.read_text()
+        readme = "\n".join(d.read_text() for d in ALL_DOCS)
         import pipeline
-        commands = re.search(r"usage: pipeline.py ([\w|-]+) STATE", pipeline.USAGE).group(1).split("|") + ["check-draft", "guard"]
+        commands = re.search(r"usage: pipeline.py ([\w|-]+) STATE", pipeline.USAGE).group(1).split("|") + ["check-draft", "guard", "tags-check", "fit-status", "bullets-check", "detect-lang", "estimate-files"]
         for cmd in commands:
             self.assertIn(f"`{cmd} ", readme + " ", f"README does not document `{cmd}`")
         for script in sorted((ROOT / "scripts").glob("*.py")) + [ROOT / "scripts" / "pdftext.swift"]:
@@ -55,7 +56,7 @@ class SkillFileTests(unittest.TestCase):
 
     def test_templates_and_skill_pass_example_blocklist(self):
         pats = nda_scrub.load_patterns(ROOT / "templates" / "blocklist.example.txt")
-        for f in list((ROOT / "templates").glob("*.md")) + [SKILL, DOC, ROOT / "README.md"]:
+        for f in list((ROOT / "templates").glob("*.md")) + [SKILL, ROOT / "skills" / "tailor-offer" / "SKILL.md"] + ALL_DOCS + [ROOT / "README.md"]:
             self.assertEqual(nda_scrub.scrub(f.read_text(), pats), [], str(f))
 
 if __name__ == "__main__":
