@@ -128,5 +128,48 @@ class TableTests(unittest.TestCase):
             self.assertEqual(pipeline.main(["fit-status", str(fit), str(ev), str(tg), "--relations", str(rel), "--check"]), 0)
 
 
+class UserStatusTests(unittest.TestCase):
+    """A row that mixes things Evidence does and does not show needs a ruling by the user, in the Notes cell."""
+    MARK = "| model guessed |"
+
+    def table(self, note):
+        return TABLE.replace(self.MARK, f"| {note} |")
+
+    def test_user_status_overrides_derived_status_but_ids_stay_derived(self):
+        fit, ev, tg, rel = files(self.table("[user-status: Partial] only one half is evidenced"))
+        r = fit_status.process(fit, ev, tg, rel)
+        row = rows(fit)[0]
+        self.assertEqual((row[3], row[4]), ("Partial", "E0001"))
+        self.assertEqual(row[5], "[user-status: Partial] only one half is evidenced")   # notes untouched
+        self.assertEqual(r["counts"], {"Yes": 1, "Partial": 3, "No": 2, "Not evidenced": 0})
+        self.assertEqual(r["overridden"], [1])
+
+    def test_idempotent_and_check_accepts_the_ruling(self):
+        fit, ev, tg, rel = files(self.table("[user-status: Partial] x"))
+        fit_status.process(fit, ev, tg, rel)
+        first = fit.read_text()
+        fit_status.process(fit, ev, tg, rel)
+        self.assertEqual(fit.read_text(), first)
+        self.assertEqual(fit_status.process(fit, ev, tg, rel, check=True)["mismatch"], [])
+
+    def test_unknown_status_value_is_ignored(self):
+        fit, ev, tg, rel = files(self.table("[user-status: Maybe] x"))
+        r = fit_status.process(fit, ev, tg, rel)
+        self.assertEqual(rows(fit)[0][3], "Yes")
+        self.assertEqual(r["overridden"], [])
+
+    def test_rows_without_the_marker_are_unchanged(self):
+        fit, ev, tg, rel = files(self.table("[user-status: No] x"))
+        fit_status.process(fit, ev, tg, rel)
+        self.assertEqual([x[3] for x in rows(fit)][1:], ["Yes", "Partial", "Partial", "No", "No", "—"])
+
+    def test_cli_names_the_overrides_count(self):
+        fit, ev, tg, rel = files(self.table("[user-status: Partial] x"))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            pipeline.main(["fit-status", str(fit), str(ev), str(tg), "--relations", str(rel)])
+        self.assertIn("overridden=1", out.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,9 @@ Partial no real-work ID, but a Personal lab ID for the tag, or an ID for a relat
 No      no ID at all
 Not evidenced  the tag is a non-skill tag (templates/non-skill-tags.txt: seniority, language level, remote...)
         and no ID carries it. Evidence cannot show it, so it is not a skill gap and not counted as No.
+A row that mixes things Evidence shows with things it does not (for example "Docker, Kafka") can carry a ruling by the
+user in its Notes cell: `[user-status: Partial]`. The ruling replaces the derived Status; Evidence IDs stay derived.
+Only the user writes it, never the model.
 A Personal lab never makes a row Yes. Evidence items without an ID cannot be cited.
 """
 import pathlib, re, sys
@@ -15,6 +18,7 @@ DEFAULT_RELATIONS = pathlib.Path(__file__).resolve().parent.parent / "templates"
 DEFAULT_NON_SKILL = pathlib.Path(__file__).resolve().parent.parent / "templates" / "non-skill-tags.txt"
 NOT_EVIDENCED = "Not evidenced"
 SPLIT = re.compile(r"(?<!\\)\|")
+USER_STATUS = re.compile(r"\[user-status: (Yes|Partial|No|Not evidenced)\]")
 DASH = "—"
 
 
@@ -70,7 +74,8 @@ def process(fit_path, evidence_path, tags_path, relations_path=None, check=False
         if need not in cols:
             raise ValueError(f"Fit table has no '{need}' column")
     ti, si, ei = cols.index("Tag"), cols.index("Status"), cols.index("Evidence IDs")
-    res = {"counts": {"Yes": 0, "Partial": 0, "No": 0, NOT_EVIDENCED: 0}, "untagged": [], "unknown_tags": [], "mismatch": []}
+    ni = cols.index("Notes") if "Notes" in cols else None
+    res = {"counts": {"Yes": 0, "Partial": 0, "No": 0, NOT_EVIDENCED: 0}, "untagged": [], "unknown_tags": [], "mismatch": [], "overridden": []}
     n = 0
     i = head + 2
     while i < len(lines) and lines[i].startswith("|"):
@@ -86,6 +91,10 @@ def process(fit_path, evidence_path, tags_path, relations_path=None, check=False
                 if canon is None:
                     res["unknown_tags"].append(n)
                 status, ids = derive(canon or raw_tag, items, relations, non_skill)
+                ruling = USER_STATUS.search(cells[ni]) if ni is not None else None
+                if ruling:
+                    status = ruling.group(1)
+                    res["overridden"].append(n)
                 res["counts"][status] += 1
             want = (status, ", ".join(ids) if ids else DASH)
             if (cells[si], cells[ei]) != want:
@@ -129,5 +138,7 @@ def main(argv):
     if check and r["mismatch"]:
         print("Status or Evidence IDs differ from the derived values in rows:", ", ".join(map(str, r["mismatch"])))
         bad = True
+    if r["overridden"]:
+        print(f"overridden={len(r['overridden'])} (user-status rulings in rows: {', '.join(map(str, r['overridden']))})")
     print("FAIL" if bad else "OK")
     return 1 if bad else 0
