@@ -39,6 +39,8 @@ Run them as `python3 scripts/pipeline.py <command> ...`.
 | Partial | No real-work ID, but a Personal lab ID for the tag, or an ID for a related tag (`templates/tag-relations.txt`, pairs written `a ~ b`). |
 | No | No Evidence ID. |
 
+A row that mixes things Evidence shows with things it does not (for example "Docker, Kafka") can carry a ruling by you in its Notes cell, `[user-status: Partial]`. The ruling replaces the derived Status; the Evidence IDs stay derived, and `fit-status` prints `overridden=N`. Only you write it, the model never does.
+
 A Personal lab never makes a row Yes. Evidence items without an ID cannot be cited, so run `assign-ids` first.
 
 ## Files

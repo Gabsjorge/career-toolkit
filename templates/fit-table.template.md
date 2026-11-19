@@ -1,6 +1,6 @@
 # Fit: {{COMPANY}} {{ROLE}}
 
-Offer language: {{LANG}}. Table state: Status and Evidence IDs are written by `pipeline.py fit-status`, never by hand. Status is Yes, Partial, No or Not evidenced. Not evidenced means a non-skill requirement (seniority, language level, remote, availability) that Evidence cannot show; it is not a skill gap.
+Offer language: {{LANG}}. Table state: Status and Evidence IDs are written by `pipeline.py fit-status`, never by hand. Status is Yes, Partial, No or Not evidenced. Not evidenced means a non-skill requirement (seniority, language level, remote, availability) that Evidence cannot show; it is not a skill gap. A row that mixes shown and unshown things can carry `[user-status: Partial]` in Notes; only the user writes it.
 
 | Requirement | Tag | Must/Nice | Status | Evidence IDs | Notes | Study recommendations |
 |---|---|---|---|---|---|---|
