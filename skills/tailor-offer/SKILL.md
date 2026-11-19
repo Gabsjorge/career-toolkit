@@ -14,7 +14,7 @@ Turns one Offer into an Application: `fit-table.md`, `cv-<lang>.md` and `cover-l
 - Every claim in a CV or letter traces to an Evidence ID. No invented metrics, degrees, titles, employers or years. Apply the Judgment rules in `skills/refresh-evidence/SKILL.md` (honest year counts, "co-designed", generic names for internal tools, contact details limited to email, LinkedIn URL, city and country).
 - Status is Yes, Partial, No or Not evidenced. Not evidenced is a non-skill requirement that Evidence cannot show; say so in Notes, do not treat it as a skill gap.
 - You never set Status or Evidence IDs in the Fit table. `PIPE fit-status` writes them.
-- You never write `<!-- ev:user -->`. Only the user approves a bullet that has no Evidence ID.
+- You never write `<!-- ev:user -->` on your own. Only the user approves a bullet that has no Evidence ID. The one exception is a standing approval: if `STATE/notes.md` has a list headed "Approved without Evidence", keep the approved bullet or skill line from the Base CV with its exact text and add `<!-- ev:user -->` to it, without asking again. You never add a line to that list; only the user does, in their own words.
 - Fetch a URL only with the fetch tool the harness provides. Never write a fetch script and never work around a proxy or block. If the fetch fails, ask the user to paste the text.
 - Application files go in `CAREER/applications/<slug>/`, never in the plugin repository. `<slug>` is lowercase `company-role` using only `a-z`, `0-9` and `-`. If the folder exists, ask before overwriting.
 - Always deliver all three files. Do not stop at the analysis.

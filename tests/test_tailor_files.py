@@ -31,6 +31,11 @@ class TailorSkillTests(unittest.TestCase):
                        "never edit `STATE/evidence.md`", "Do not hand-set Status"]:
             self.assertIn(needle, SKILL, needle)
 
+    def test_standing_user_approval_in_notes_is_honored(self):
+        for needle in ["Approved without Evidence", "STATE/notes.md", "keep the approved bullet",
+                       "never add a line to that list"]:
+            self.assertIn(needle, SKILL, needle)
+
     def test_never_asks_for_paths_or_reads_private_files(self):
         self.assertIn("Never read, print or summarize `STATE/config.json`", SKILL)
 
