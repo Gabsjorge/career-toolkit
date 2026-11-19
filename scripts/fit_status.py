@@ -3,6 +3,8 @@
 Yes     at least one Evidence ID (real work) whose tags include the row's tag
 Partial no real-work ID, but a Personal lab ID for the tag, or an ID for a related tag
 No      no ID at all
+Not evidenced  the tag is a non-skill tag (templates/non-skill-tags.txt: seniority, language level, remote...)
+        and no ID carries it. Evidence cannot show it, so it is not a skill gap and not counted as No.
 A Personal lab never makes a row Yes. Evidence items without an ID cannot be cited.
 """
 import pathlib, re, sys
@@ -10,6 +12,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import evidence, tags as taglib
 
 DEFAULT_RELATIONS = pathlib.Path(__file__).resolve().parent.parent / "templates" / "tag-relations.txt"
+DEFAULT_NON_SKILL = pathlib.Path(__file__).resolve().parent.parent / "templates" / "non-skill-tags.txt"
+NOT_EVIDENCED = "Not evidenced"
 SPLIT = re.compile(r"(?<!\\)\|")
 DASH = "—"
 
@@ -26,14 +30,21 @@ def load_relations(path):
     return rel
 
 
-def derive(tag, items, relations):
+def load_non_skill(path):
+    return {l.strip().lower() for l in pathlib.Path(path).read_text().splitlines()
+            if l.strip() and not l.strip().startswith("#")}
+
+
+def derive(tag, items, relations, non_skill=frozenset()):
     direct = sorted(i for i, v in items.items() if tag in v["tags"])
     real = [i for i in direct if not items[i]["lab"]]
     if real:
         return "Yes", real
     related = set(relations.get(tag, ()))
     ids = sorted(i for i, v in items.items() if i in direct or (v["tags"] & related))
-    return ("Partial", ids) if ids else ("No", [])
+    if ids:
+        return "Partial", ids
+    return (NOT_EVIDENCED, []) if tag in non_skill else ("No", [])
 
 
 def _cells(line):
@@ -44,11 +55,12 @@ def _line(cells):
     return "| " + " | ".join(cells) + " |"
 
 
-def process(fit_path, evidence_path, tags_path, relations_path=None, check=False):
+def process(fit_path, evidence_path, tags_path, relations_path=None, check=False, non_skill_path=None):
     fit = pathlib.Path(fit_path)
     items = evidence.load(evidence_path)
     tags, aliases = taglib.load(tags_path)
     relations = load_relations(relations_path or DEFAULT_RELATIONS)
+    non_skill = load_non_skill(non_skill_path or DEFAULT_NON_SKILL)
     lines = fit.read_text().split("\n")
     head = next((i for i, l in enumerate(lines) if l.startswith("|") and "Requirement" in l), None)
     if head is None:
@@ -58,7 +70,7 @@ def process(fit_path, evidence_path, tags_path, relations_path=None, check=False
         if need not in cols:
             raise ValueError(f"Fit table has no '{need}' column")
     ti, si, ei = cols.index("Tag"), cols.index("Status"), cols.index("Evidence IDs")
-    res = {"counts": {"Yes": 0, "Partial": 0, "No": 0}, "untagged": [], "unknown_tags": [], "mismatch": []}
+    res = {"counts": {"Yes": 0, "Partial": 0, "No": 0, NOT_EVIDENCED: 0}, "untagged": [], "unknown_tags": [], "mismatch": []}
     n = 0
     i = head + 2
     while i < len(lines) and lines[i].startswith("|"):
@@ -73,7 +85,7 @@ def process(fit_path, evidence_path, tags_path, relations_path=None, check=False
                 canon = taglib.resolve(raw_tag, tags, aliases)
                 if canon is None:
                     res["unknown_tags"].append(n)
-                status, ids = derive(canon or raw_tag, items, relations)
+                status, ids = derive(canon or raw_tag, items, relations, non_skill)
                 res["counts"][status] += 1
             want = (status, ", ".join(ids) if ids else DASH)
             if (cells[si], cells[ei]) != want:
@@ -106,7 +118,7 @@ def main(argv):
         print(e)
         return 1
     c = r["counts"]
-    print(f"yes={c['Yes']} partial={c['Partial']} no={c['No']}")
+    print(f"yes={c['Yes']} partial={c['Partial']} no={c['No']} not_evidenced={c[NOT_EVIDENCED]}")
     bad = False
     if r["untagged"]:
         print("untagged rows:", ", ".join(map(str, r["untagged"])))

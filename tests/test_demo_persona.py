@@ -23,7 +23,7 @@ class DemoPersonaTests(unittest.TestCase):
         r = fit_status.process(fit, P / "evidence.example.md", TAGS, check=True)
         self.assertEqual(r["mismatch"], [])
         self.assertEqual((r["untagged"], r["unknown_tags"]), ([], []))
-        self.assertEqual(r["counts"], {"Yes": 5, "Partial": 2, "No": 1})
+        self.assertEqual(r["counts"], {"Yes": 5, "Partial": 2, "No": 1, "Not evidenced": 0})
 
     def test_cv_has_no_unsourced_bullets(self):
         r = bullets_check.check((P / "output" / "cv-en.md").read_text(), evidence.load(P / "evidence.example.md"))

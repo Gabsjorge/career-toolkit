@@ -1,0 +1,3 @@
+# Implication rules: "a, b, c => target". Any item with a tag on the left also gets the tag on the right.
+# Applied by: pipeline.py tag-evidence EVIDENCE TAGS --implies FILE [--apply]. The target must be in the tag list.
+html, css, react => full-stack

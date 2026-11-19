@@ -115,6 +115,54 @@ def apply(evidence, tags_file, proposals=None, today=None, dry=False):
     return result
 
 
+def load_implies(path, tags, aliases):
+    """Rules `a, b => target`. The target must be in the tag list. -> [(set(lhs), target)]"""
+    rules = []
+    for n, raw in enumerate(pathlib.Path(path).read_text().splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=>" not in line:
+            raise ValueError(f"implication rule at line {n} needs '=>'")
+        lhs, rhs = (x.strip() for x in line.split("=>", 1))
+        target = taglib.resolve(rhs, tags, aliases)
+        if target is None:
+            raise ValueError(f"implication target '{rhs}' (line {n}) is not in the tag list")
+        names = {taglib.resolve(x, tags, aliases) or x.strip().lower() for x in lhs.split(",") if x.strip()}
+        if not names:
+            raise ValueError(f"implication rule at line {n} has no source tags")
+        rules.append((names, target))
+    return rules
+
+
+def imply(evidence, tags_file, implies_file, today=None, dry=False):
+    """Append the target tag to every item whose tags include a source tag. Appends only. Backs up first."""
+    ev = pathlib.Path(evidence)
+    tags, aliases = taglib.load(tags_file)
+    rules = load_implies(implies_file, tags, aliases)
+    out, changed = [], 0
+    for line in ev.read_text().splitlines(keepends=True):
+        m = ITEM.match(line)
+        t = HAS_TAGS.search(line) if m else None
+        if t:
+            cur = [x.strip() for x in t.group(1).split(",") if x.strip()]
+            new = list(cur)
+            for names, target in rules:
+                if target not in new and names & set(new):
+                    new.append(target)
+            if new != cur:
+                line = line[:t.start(1)] + ", ".join(new) + line[t.end(1):]
+                changed += 1
+        out.append(line)
+    result = {"written": 0, "would_write": changed}
+    if dry or not changed:
+        return result
+    assign_ids._backup(ev, today or datetime.date.today().isoformat())
+    ev.write_text("".join(out))
+    result["written"] = changed
+    return result
+
+
 def write_pending(evidence, tags_file, out_path):
     a = analyze(evidence, tags_file)
     data = [{"id": i, "line": a["lines"][i]} for i in a["pending"]]
@@ -127,18 +175,20 @@ def write_pending(evidence, tags_file, out_path):
     return len(data)
 
 
-USAGE = "usage: pipeline.py tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE]"
+USAGE = "usage: pipeline.py tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE] | tag-evidence EVIDENCE TAGS --implies FILE [--apply]"
 
 
 def main(argv):
-    pos, apply_, pending, proposals_path, i = [], False, None, None, 0
+    pos, apply_, pending, proposals_path, implies, i = [], False, None, None, None, 0
     while i < len(argv):
         a = argv[i]
         if a == "--apply":
             apply_ = True
-        elif a in ("--pending", "--proposals") and i + 1 < len(argv):
+        elif a in ("--pending", "--proposals", "--implies") and i + 1 < len(argv):
             if a == "--pending":
                 pending = argv[i + 1]
+            elif a == "--implies":
+                implies = argv[i + 1]
             else:
                 proposals_path = argv[i + 1]
             i += 1
@@ -151,6 +201,18 @@ def main(argv):
     if len(pos) != 2:
         print(USAGE, file=sys.stderr)
         return 64
+    if implies:
+        try:
+            r = imply(pos[0], pos[1], implies, dry=not apply_)
+        except OSError:
+            print("cannot read the evidence file, the tag list or the implication file")
+            return 1
+        except ValueError as e:
+            print(e)
+            return 1
+        print("applied" if apply_ else "dry run: nothing written")
+        print(f"written: {r['written']}" if apply_ else f"would write: {r['would_write']}")
+        return 0
     try:
         proposals = None
         if proposals_path:

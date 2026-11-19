@@ -73,7 +73,7 @@ class TableTests(unittest.TestCase):
         self.assertEqual(r_rows[0][5], "model guessed")     # notes untouched
         self.assertEqual(r_rows[2][6], "Do a small lab")
         self.assertIn("Notes below the table stay.", fit.read_text())
-        self.assertEqual(r["counts"], {"Yes": 2, "Partial": 2, "No": 2})
+        self.assertEqual(r["counts"], {"Yes": 2, "Partial": 2, "No": 2, "Not evidenced": 0})
         self.assertEqual(r["untagged"], [7])
         self.assertEqual(r["unknown_tags"], [6])
 

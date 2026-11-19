@@ -69,6 +69,14 @@ english
 portuguese
 spanish
 german
+html
+css
+full-stack
+seniority
+remote
+availability
+relocation
+contract
 [aliases]
 k8s=kubernetes
 node=nodejs
