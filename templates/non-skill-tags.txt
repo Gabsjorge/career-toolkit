@@ -1,7 +1,7 @@
 # Non-skill tags: requirements that Evidence cannot show (not a skill gap).
 # A Fit row with one of these tags and no Evidence ID gets Status "Not evidenced", not "No".
 # If an Evidence item carries the tag (for example a [user-stated] item), the row is Yes as usual.
-seniority
+senior
 english
 portuguese
 remote

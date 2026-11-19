@@ -4,7 +4,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "scripts"))
 import draft_check, fit_status, pipeline, tag_evidence
 
-TAGS = "kafka\nrust\nreact\nhtml\ncss\nfull-stack\nenglish\nseniority\nremote\n[aliases]\nfullstack=full-stack\n"
+TAGS = "kafka\nrust\nreact\nhtml\ncss\nfull-stack\nenglish\nsenior\nremote\n[aliases]\nfullstack=full-stack\n"
 IMPLIES = "# rule is data\nhtml, css, react => full-stack\n"
 EVIDENCE = """# Evidence
 
@@ -22,12 +22,12 @@ EVIDENCE = """# Evidence
 FIT = """| Requirement | Tag | Must/Nice | Status | Evidence IDs | Notes | Study recommendations |
 |---|---|---|---|---|---|---|
 | Kafka | kafka | Must | | | | |
-| Senior level | seniority | Must | | | | |
+| Senior level | senior | Must | | | | |
 | English C1 | english | Must | | | | |
 | Remote | remote | Nice | | | | |
 | Rust | rust | Nice | | | | |
 """
-NONSKILL = "# non-skill tags\nseniority\nenglish\nremote\navailability\n"
+NONSKILL = "# non-skill tags\nsenior\nenglish\nremote\navailability\n"
 
 
 def make(**files):
@@ -161,6 +161,13 @@ class NotEvidencedTests(unittest.TestCase):
         root = HERE.parent
         for f in ("templates/fit-table.template.md", "skills/tailor-offer/SKILL.md"):
             self.assertIn("Not evidenced", (root / f).read_text(), f)
+
+    def test_every_default_non_skill_tag_is_in_the_default_tag_list(self):
+        import tags as taglib
+        tags, _ = taglib.load(HERE.parent / "templates/tags.default.txt")
+        ns = fit_status.load_non_skill(fit_status.DEFAULT_NON_SKILL)
+        self.assertEqual(sorted(ns - tags), [])
+        self.assertIn("senior", ns)
 
     def test_default_tag_list_has_full_stack_and_default_rule_exists(self):
         root = HERE.parent
