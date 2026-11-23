@@ -12,7 +12,7 @@ Terms such as Offer, Evidence and Fit table are defined in [CONTEXT.md](CONTEXT.
 |---|---|
 | `refresh-evidence` | available, with Evidence IDs and a machine gate; see [docs/refresh-evidence.md](docs/refresh-evidence.md) |
 | `tailor-offer` | available; see [docs/tailor-offer.md](docs/tailor-offer.md) and the demo in [examples/persona](examples/persona) |
-| `study-plan` | planned |
+| `study-plan` | available, pending a live test; see [docs/study-plan.md](docs/study-plan.md) |
 | `search-offers` | reserved |
 
 ## The private-data rule
