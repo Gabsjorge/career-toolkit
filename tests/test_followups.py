@@ -168,6 +168,7 @@ class NotEvidencedTests(unittest.TestCase):
         ns = fit_status.load_non_skill(fit_status.DEFAULT_NON_SKILL)
         self.assertEqual(sorted(ns - tags), [])
         self.assertIn("senior", ns)
+        self.assertIn("agile", ns)   # a way of working, not a skill a commit can show
 
     def test_default_tag_list_has_full_stack_and_default_rule_exists(self):
         root = HERE.parent
