@@ -101,6 +101,12 @@ class ClaimTests(unittest.TestCase):
         self.assertEqual(self.run_check("- Migrated billing in 2019. <!-- ev:E0002 -->\n"),
                          [(1, "number not in cited evidence")])
 
+    def test_number_with_unit_suffix_in_evidence_counts(self):
+        import evidence
+        ev = "- **E0009** **[high] 2026-01** — Cut each query from ~45s to under 10s. _(tags: performance)_\n"
+        cv = "- Cut queries from 45 s to under 10 s. <!-- ev:E0009 -->\n- Wrote E2E tests. <!-- ev:E0009 -->\n"
+        self.assertEqual(bullets_check.check(cv, evidence.load(tmp(ev)), WORDS)["problems"], [])
+
     def test_no_claim_words_means_numbers_only(self):
         import evidence
         r = bullets_check.check("- Led it. <!-- ev:E0001 -->\n", evidence.load(tmp(EV2)))
