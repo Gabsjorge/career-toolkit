@@ -1,0 +1,10 @@
+# Words that make a claim. A CV bullet using one must cite Evidence that contains it.
+# One lowercase word or phrase per line. Edit freely.
+offshore
+led
+leader
+leadership
+team of
+managed
+mentored
+architected

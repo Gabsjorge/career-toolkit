@@ -53,5 +53,58 @@ class BulletsTests(unittest.TestCase):
         self.assertIn("FAIL", out.getvalue())
 
 
+EV2 = """# Evidence
+- **E0001** **[high] 2026-09** — Reviewed about 1,800 pull requests and cut build time by 40%. _(tags: code-review)_
+- **E0002** **[high] 2026-08** — Led the migration of the billing service. _(tags: migration)_
+- **E0003** **[med] 2026-07** — Worked with an offshore team. _(tags: offshore-teams)_
+"""
+WORDS = ["offshore", "led", "team of"]
+
+
+class ClaimTests(unittest.TestCase):
+    def run_check(self, cv):
+        import evidence
+        return bullets_check.check(cv, evidence.load(tmp(EV2)), WORDS)["problems"]
+
+    def test_supported_number_passes(self):
+        self.assertEqual(self.run_check("- Reviewed ~1,800 pull requests. <!-- ev:E0001 -->\n"), [])
+        self.assertEqual(self.run_check("- Cut build time 40%. <!-- ev:E0001 -->\n"), [])
+
+    def test_unsupported_number_is_listed(self):
+        self.assertEqual(self.run_check("- Reviewed 5,000 pull requests. <!-- ev:E0001 -->\n"),
+                         [(1, "number not in cited evidence")])
+
+    def test_multi_id_passes_when_any_item_has_the_number(self):
+        self.assertEqual(self.run_check("- Reviewed 1800 PRs. <!-- ev:E0002, E0001 -->\n"), [])
+
+    def test_user_approved_bullet_is_exempt(self):
+        self.assertEqual(self.run_check("- Led a team of 12 offshore. <!-- ev:user -->\n"), [])
+
+    def test_claim_word_unsupported_is_listed(self):
+        self.assertEqual(self.run_check("- Led offshore delivery. <!-- ev:E0001 -->\n"),
+                         [(1, "claim word not in cited evidence")])
+
+    def test_claim_word_supported_passes(self):
+        self.assertEqual(self.run_check("- Led billing migration. <!-- ev:E0002 -->\n"), [])
+        self.assertEqual(self.run_check("- Worked offshore. <!-- ev:E0003 -->\n"), [])
+
+    def test_claim_word_is_whole_word(self):
+        self.assertEqual(self.run_check("- Handled misled tickets. <!-- ev:E0001 -->\n"), [])
+
+    def test_no_claim_words_means_numbers_only(self):
+        import evidence
+        r = bullets_check.check("- Led it. <!-- ev:E0001 -->\n", evidence.load(tmp(EV2)))
+        self.assertEqual(r["problems"], [])
+
+    def test_default_claim_words_file_is_used_by_cli(self):
+        cv, ev = tmp("- Led offshore delivery. <!-- ev:E0001 -->\n", "cv.md"), tmp(EV2, "ev.md")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = pipeline.main(["bullets-check", str(cv), str(ev)])
+        self.assertEqual(code, 1)
+        self.assertIn("cv.md:1: claim word not in cited evidence", out.getvalue())
+        self.assertNotIn("offshore", out.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()

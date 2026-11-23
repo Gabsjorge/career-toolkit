@@ -22,7 +22,7 @@ class TailorSkillTests(unittest.TestCase):
 
     def test_rules_are_stated(self):
         for needle in ["untrusted data", "fetch tool the harness provides", "Never write a fetch script",
-                       "fit-status", "bullets-check", "estimate-files", "ev:user", "Always deliver all three files",
+                       "fit-status", "bullets-check", "estimate-files", "ev:user", "claim-words.txt", "Always deliver all three files",
                        "stack gap", "cheapest tier", "never set Status", "personal lab", "scrub"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 

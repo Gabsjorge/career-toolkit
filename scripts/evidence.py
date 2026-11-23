@@ -7,7 +7,7 @@ LAB = re.compile(r"_\(kind: lab\)_")
 
 
 def load(path):
-    """{id: {"tags": set, "lab": bool}}; items without an ID are not citable and are skipped."""
+    """{id: {"tags": set, "lab": bool, "text": str}}; items without an ID are not citable and are skipped."""
     items = {}
     for line in pathlib.Path(path).read_text().splitlines():
         m = ITEM.match(line)
@@ -15,5 +15,6 @@ def load(path):
             continue
         tm = TAGS.search(line)
         tags = {t.strip() for t in tm.group(1).split(",") if t.strip()} if tm else set()
-        items[m.group(1)] = {"tags": tags, "lab": bool(LAB.search(line))}
+        items[m.group(1)] = {"tags": tags, "lab": bool(LAB.search(line)),
+                             "text": line.split("—", 1)[-1]}
     return items
