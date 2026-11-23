@@ -13,7 +13,7 @@ import evidence
 BULLET = re.compile(r"^\s*[-*+]\s+")
 MARKER = re.compile(r"<!--\s*ev:\s*([^>]*?)\s*-->")
 ID = re.compile(r"E\d{4,}\Z")
-NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
+NUMBER = re.compile(r"(?<![\w])\d[\d,]*(?:\.\d+)?(?![\w])")
 CLAIM_WORDS = pathlib.Path(__file__).resolve().parent.parent / "templates" / "claim-words.txt"
 
 

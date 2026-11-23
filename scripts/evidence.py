@@ -16,5 +16,5 @@ def load(path):
         tm = TAGS.search(line)
         tags = {t.strip() for t in tm.group(1).split(",") if t.strip()} if tm else set()
         items[m.group(1)] = {"tags": tags, "lab": bool(LAB.search(line)),
-                             "text": line.split("—", 1)[-1]}
+                             "text": line}
     return items

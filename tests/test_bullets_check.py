@@ -91,6 +91,16 @@ class ClaimTests(unittest.TestCase):
     def test_claim_word_is_whole_word(self):
         self.assertEqual(self.run_check("- Handled misled tickets. <!-- ev:E0001 -->\n"), [])
 
+    def test_digits_inside_words_are_not_numbers(self):
+        self.assertEqual(self.run_check("- Wrote Jest E2E tests on S3 and OAuth2. <!-- ev:E0002 -->\n"), [])
+
+    def test_year_in_cited_item_date_passes(self):
+        self.assertEqual(self.run_check("- Migrated billing in 2026. <!-- ev:E0002 -->\n"), [])
+
+    def test_year_not_in_cited_item_date_is_listed(self):
+        self.assertEqual(self.run_check("- Migrated billing in 2019. <!-- ev:E0002 -->\n"),
+                         [(1, "number not in cited evidence")])
+
     def test_no_claim_words_means_numbers_only(self):
         import evidence
         r = bullets_check.check("- Led it. <!-- ev:E0001 -->\n", evidence.load(tmp(EV2)))
