@@ -8,11 +8,6 @@
       "status": "Yes"
     },
     {
-      "tag": "github-actions",
-      "priority": "must",
-      "status": "Yes"
-    },
-    {
       "tag": "terraform",
       "priority": "must",
       "status": "No"
