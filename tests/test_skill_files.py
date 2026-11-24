@@ -2,7 +2,7 @@ import pathlib, re, sys, unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKILL = ROOT / "skills" / "refresh-evidence" / "SKILL.md"
 DOC = ROOT / "docs" / "refresh-evidence.md"
-ALL_DOCS = [DOC, ROOT / "docs" / "tailor-offer.md", ROOT / "docs" / "study-plan.md"]
+ALL_DOCS = [DOC, ROOT / "docs" / "tailor-offer.md", ROOT / "docs" / "study-plan.md", ROOT / "docs" / "evals.md"]
 sys.path.insert(0, str(ROOT / "scripts"))
 import nda_scrub
 
@@ -39,7 +39,7 @@ class SkillFileTests(unittest.TestCase):
     def test_readme_documents_every_command_and_script(self):
         readme = "\n".join(d.read_text() for d in ALL_DOCS)
         import pipeline
-        commands = re.search(r"usage: pipeline.py ([\w|-]+) STATE", pipeline.USAGE).group(1).split("|") + ["check-draft", "guard", "tags-check", "fit-status", "bullets-check", "detect-lang", "estimate-files", "gap-count"]
+        commands = re.search(r"usage: pipeline.py ([\w|-]+) STATE", pipeline.USAGE).group(1).split("|") + ["check-draft", "guard", "tags-check", "fit-status", "bullets-check", "detect-lang", "estimate-files", "gap-count", "eval-score", "eval-setup"]
         for cmd in commands:
             self.assertIn(f"`{cmd} ", readme + " ", f"README does not document `{cmd}`")
         for script in sorted((ROOT / "scripts").glob("*.py")) + [ROOT / "scripts" / "pdftext.swift"]:
