@@ -41,3 +41,5 @@ Turns one Offer into an Application: `fit-table.md`, `cv-<lang>.md` and `cover-l
 | Requirements extraction | cheapest (for example `haiku`) |
 | CV and cover letter wording | stronger |
 | Everything else | scripts, no model |
+
+The CV and letter wording is written by the session model, not a dispatched subagent. For an Offer that matters, the user can start the session on a stronger model with `/model`.

@@ -26,6 +26,10 @@ class TailorSkillTests(unittest.TestCase):
                        "stack gap", "cheapest tier", "never set Status", "personal lab", "scrub"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 
+    def test_session_model_writes_cv_and_letter(self):
+        for needle in ["written by the session model", "not a dispatched subagent", "`/model`"]:
+            self.assertIn(needle, SKILL, needle)
+
     def test_untagged_evidence_does_not_stop_the_skill(self):
         for needle in ["Evidence without tags is expected", "Do not pause",
                        "never edit `STATE/evidence.md`", "Do not hand-set Status"]:
