@@ -13,7 +13,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import nda_scrub
 
 SENSITIVE_NAMES = {"blocklist.txt", "config.json", "label-map.json", "last_run.json",
-                   "evidence.md", "evidence-draft.md", "notes.md", "tags.txt", "tag-tracks.txt"}
+                   "evidence.md", "evidence-draft.md", "notes.md", "tags.txt", "tag-tracks.txt", "tag-groups.txt"}
 SENSITIVE_SUFFIXES = {".pdf", ".bak", ".log"}
 SKIP_DIRS = {".git", "node_modules", "__pycache__"}
 SKIP_SCAN_NAMES = {"package-lock.json"}

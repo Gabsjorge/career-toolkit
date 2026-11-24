@@ -29,6 +29,12 @@ class StudySkillTests(unittest.TestCase):
                        "Not evidenced", "kind: lab", "stronger"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 
+    def test_groups_are_seeded_passed_to_both_gap_count_calls_and_never_summed(self):
+        self.assertIn("tag-groups.default.txt", SKILL)
+        self.assertEqual(SKILL.count("--groups STATE/tag-groups.txt"), 2)
+        for needle in ["`top_member`", "never add a group's numbers to its members' numbers"]:
+            self.assertIn(needle.lower(), SKILL.lower(), needle)
+
     def test_plan_is_written_by_a_dispatched_stronger_model(self):
         for needle in ["Dispatch one subagent", "`model: opus`", "Read only the listed paths",
                        "Returns only the Markdown", "Plan wording written by:"]:

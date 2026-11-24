@@ -40,7 +40,7 @@ class GuardTests(unittest.TestCase):
         self.assertEqual(self.violations({"applications/.gitkeep": ""}), [])
 
     def test_sensitive_file_names(self):
-        for name in ["blocklist.txt", "config.json", "label-map.json", "evidence.md", "notes.md"]:
+        for name in ["blocklist.txt", "config.json", "label-map.json", "evidence.md", "notes.md", "tag-groups.txt"]:
             v = self.violations({f"docs/{name}": "x"})
             self.assertEqual(len(v), 1, name)
             self.assertIn(name, v[0])

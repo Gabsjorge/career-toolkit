@@ -7,6 +7,9 @@ import gap_count, pipeline
 TRACKS = """# tag = track, type
 kafka = backend, tech
 kubernetes = backend+lead, tech
+aws = backend, tech
+gcp = backend, tech
+azure = backend, tech
 mentoring = lead, skill
 english = lead, language
 """
@@ -28,9 +31,13 @@ def apps(tables, tracks=TRACKS):
     return root / "applications", tf
 
 
-def run(tables, tracks=TRACKS):
+def run(tables, tracks=TRACKS, groups=None):
     a, t = apps(tables, tracks)
-    return gap_count.count(a, t)
+    if groups is None:
+        return gap_count.count(a, t)
+    g = t.parent / "groups.txt"
+    g.write_text(groups)
+    return gap_count.count(a, t, g)
 
 
 def entry(res, track, tag):
@@ -216,6 +223,93 @@ class CliTests(unittest.TestCase):
         r = json.loads(out)
         self.assertEqual(r["tables_read"], 2)
         self.assertEqual(r["tables_skipped"], [])
+
+
+CLOUD = "cloud = aws, gcp, azure\n"
+
+
+def group(res, track, name):
+    return next(g for g in res["groups"] if g["track"] == track and g["group"] == name)
+
+
+class GroupTests(unittest.TestCase):
+    def two_offers(self):
+        return {"a": table(("a1", "aws", "Must", "No"), ("a2", "gcp", "Nice", "Partial")),
+                "b": table(("b1", "aws", "Must", "No"), ("b2", "azure", "Nice", "No")),
+                "c": table(("c1", "kafka", "Must", "No"))}
+
+    def test_group_sums_rows_and_weights(self):
+        g = group(run(self.two_offers(), groups=CLOUD), "backend", "cloud")
+        self.assertEqual((g["gaps"], g["no"], g["partial"], g["must_weighted"]), (4, 3, 1, 6))
+        self.assertEqual(g["members"], {"aws": 2, "gcp": 1, "azure": 1})
+        self.assertEqual(g["type"], "tech")
+
+    def test_offer_naming_two_providers_counts_once(self):
+        g = group(run(self.two_offers(), groups=CLOUD), "backend", "cloud")
+        self.assertEqual(g["tables"], 2)                 # a and b, not 4
+
+    def test_top_member_by_weight_then_gaps_then_name(self):
+        r = run(self.two_offers(), groups=CLOUD)
+        self.assertEqual(group(r, "backend", "cloud")["top_member"], "aws")
+        tie = run({"a": table(("x", "gcp", "Nice", "No"), ("y", "azure", "Nice", "No"))}, groups=CLOUD)
+        self.assertEqual(group(tie, "backend", "cloud")["top_member"], "azure")
+        more = run({"a": table(("x", "gcp", "Nice", "No"), ("y", "gcp", "Nice", "No"), ("z", "azure", "Nice", "No"),
+                               ("w", "azure", "Nice", "No"))}, groups=CLOUD)
+        self.assertEqual(group(more, "backend", "cloud")["top_member"], "azure")   # same weight, same gaps: name
+
+    def test_tracks_output_is_unchanged_by_groups(self):
+        plain, grouped = run(self.two_offers()), run(self.two_offers(), groups=CLOUD)
+        self.assertEqual(plain["tracks"], grouped["tracks"])
+        self.assertEqual(plain["groups"], [])
+
+    def test_group_without_gaps_is_absent(self):
+        r = run({"a": table(("a1", "aws", "Must", "Yes"))}, groups=CLOUD)
+        self.assertEqual(r["groups"], [])
+
+    def test_group_follows_the_tracks_of_its_members(self):
+        tracks = TRACKS + "docker = lead, tech\n"
+        r = run({"a": table(("d", "docker", "Must", "No"), ("k", "kubernetes", "Nice", "No"))}, tracks,
+                "containers = docker, kubernetes\n")
+        self.assertEqual({(g["track"]) for g in r["groups"]}, {"backend", "lead"})
+        self.assertEqual(group(r, "backend", "containers")["members"], {"kubernetes": 1})
+        self.assertEqual(group(r, "lead", "containers")["members"], {"docker": 1, "kubernetes": 1})
+
+    def test_bad_group_files_name_the_line_not_the_value(self):
+        a, t = apps({"a": table(("x", "aws", "Must", "No"))})
+        for text, frag in (("cloud aws, gcp\n", "line 1"), ("cloud = aws\n", "line 1"),
+                           ("cloud = aws, nope\n", "line 1"), ("# c\ncloud = aws, gcp\ncloud = aws, azure\n", "line 3"),
+                           ("kafka = aws, gcp\n", "line 1"), ("c1 = aws, gcp\nc2 = gcp, azure\n", "line 2")):
+            g = t.parent / "g.txt"
+            g.write_text(text)
+            with self.assertRaises(ValueError) as cm:
+                gap_count.count(a, t, g)
+            self.assertIn(frag, str(cm.exception))
+            self.assertNotIn("nope", str(cm.exception))
+
+    def test_default_group_file_members_are_default_tags_and_mapped(self):
+        import tags
+        known, _ = tags.load(ROOT / "templates" / "tags.default.txt")
+        tmap = gap_count.load_tracks(ROOT / "templates" / "tag-tracks.default.txt")
+        groups = gap_count.load_groups(ROOT / "templates" / "tag-groups.default.txt", tmap)
+        self.assertEqual(groups, {"cloud": ["aws", "gcp", "azure"]})
+        self.assertTrue(all(m in known for ms in groups.values() for m in ms))
+
+    def test_check_accepts_a_group_row_and_flags_a_wrong_number(self):
+        r = run(self.two_offers(), groups=CLOUD)
+        good = "| track | tag | gaps | weighted | offers |\n|---|---|---|---|---|\n| backend | cloud | 4 | 6 | 2 |\n| backend | aws | 2 | 4 | 2 |\n"
+        self.assertEqual(gap_count.check_plan(r, good), [])
+        bad = good.replace("| cloud | 4 |", "| cloud | 5 |")
+        self.assertEqual(gap_count.check_plan(r, bad), ["backend/cloud"])
+
+    def test_cli_groups_flag(self):
+        a, t = apps(self.two_offers())
+        g = t.parent / "g.txt"
+        g.write_text(CLOUD)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = pipeline.main(["gap-count", str(a), str(t), "--groups", str(g)])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(buf.getvalue())["groups"][0]["group"], "cloud")
 
 
 if __name__ == "__main__":

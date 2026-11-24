@@ -124,7 +124,7 @@ def _harvest_into(stage, cfg, pats, since, sd, pr_runner):
 
 ALLOWED_FLAGS = {"digest": {"--full"}, "mark-run": {"--accept-gaps", "--accept-strays"}}
 USAGE = ("usage: pipeline.py init|digest|estimate|scrub|mark-run|check-strays STATE [...] | check-draft FILE"
-         " | guard DIR [--blocklist FILE] | assign-ids STATE | tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE] | backfill-fit APPS EVIDENCE TAGS [--pending OUT] [--proposals FILE] [--report OUT] [--apply] | tags-check TAGS REQS | fit-status FIT EVIDENCE TAGS [--relations F] [--check] | bullets-check CV EVIDENCE | gap-count APPS TRACKS [--check PLAN] | eval-score PERSONA RESULTS [--out FILE] | eval-setup PERSONA DEST | detect-lang FILE | estimate-files CAP PRICE FILE... | config-check | gate refresh | state-dir")
+         " | guard DIR [--blocklist FILE] | assign-ids STATE | tag-evidence EVIDENCE TAGS [--apply] [--pending OUT] [--proposals FILE] | backfill-fit APPS EVIDENCE TAGS [--pending OUT] [--proposals FILE] [--report OUT] [--apply] | tags-check TAGS REQS | fit-status FIT EVIDENCE TAGS [--relations F] [--check] | bullets-check CV EVIDENCE | gap-count APPS TRACKS [--groups FILE] [--check PLAN] | eval-score PERSONA RESULTS [--out FILE] | eval-setup PERSONA DEST | detect-lang FILE | estimate-files CAP PRICE FILE... | config-check | gate refresh | state-dir")
 
 
 def main(argv):

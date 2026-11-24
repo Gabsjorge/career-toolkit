@@ -4,7 +4,10 @@ A gap is a Fit row whose Status is Partial or No. Yes, Not evidenced and untagge
 Weight: Must counts 2; Nice and an unknown Must/Nice ("—", as in backfilled old tables) count 1.
 A tag maps to a track and a type through a user-editable file (templates/tag-tracks.default.txt):
     tag = backend|lead|backend+lead, tech|skill|language
-A tag with no line is reported under unmapped_tags and never guessed. A table that cannot be read whole
+A tag with no line is reported under unmapped_tags and never guessed.
+An optional groups file (templates/tag-groups.default.txt, `cloud = aws, gcp, azure`) adds a top-level `groups` list: one entry
+per track and group with summed gaps and weights, `members` (gaps per tag), `top_member` and `tables` (each Offer once). The
+`tracks` list never changes because of a group. A table that cannot be read whole
 (no header, a row with the wrong cell count, an unknown Status) is skipped and named.
 """
 import json, pathlib, re, sys
@@ -38,6 +41,30 @@ def load_tracks(path):
     return out
 
 
+def load_groups(path, tmap):
+    """group name -> member tags. Errors name the line number, never the value."""
+    out, owner = {}, {}
+    for n, raw in enumerate(pathlib.Path(path).read_text().splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            raise ValueError(f"tag groups line {n}: expected 'group = tag, tag'")
+        name, rest = (x.strip() for x in line.split("=", 1))
+        members = [m.strip() for m in rest.split(",") if m.strip()]
+        if not name or len(members) < 2 or len(set(members)) != len(members):
+            raise ValueError(f"tag groups line {n}: a group needs two or more different tags")
+        if name in out or name in tmap:
+            raise ValueError(f"tag groups line {n}: group name is already used (as a group or a tag)")
+        if any(m not in tmap for m in members):
+            raise ValueError(f"tag groups line {n}: every member must be in the tag-to-track map")
+        if any(m in owner for m in members):
+            raise ValueError(f"tag groups line {n}: a tag can be in only one group")
+        out[name] = members
+        owner.update({m: name for m in members})
+    return out
+
+
 def _cells(line):
     return [c.strip() for c in SPLIT.split(line.strip())[1:-1]]
 
@@ -62,13 +89,15 @@ def read_table(path):
     return rows
 
 
-def count(apps_dir, tracks_path):
+def count(apps_dir, tracks_path, groups_path=None):
     tmap = load_tracks(tracks_path)
+    groups = load_groups(groups_path, tmap) if groups_path else {}
+    owner = {m: g for g, ms in groups.items() for m in ms}
     apps = pathlib.Path(apps_dir)
     if not apps.is_dir():
         raise ValueError("applications folder not found")
-    res = {"tables_read": 0, "tables_skipped": [], "rows": 0, "untagged_rows": 0, "unmapped_tags": {}, "tracks": {t: [] for t in TRACKS}}
-    acc = {}
+    res = {"tables_read": 0, "tables_skipped": [], "rows": 0, "untagged_rows": 0, "unmapped_tags": {}, "tracks": {t: [] for t in TRACKS}, "groups": []}
+    acc, gacc = {}, {}
     for d in sorted(p for p in apps.iterdir() if p.is_dir()):
         f = d / "fit-table.md"
         if not f.is_file():
@@ -95,6 +124,24 @@ def count(apps_dir, tracks_path):
                 e[status] += 1
                 e["must_weighted"] += 2 if must == "must" else 1
                 e["_tables"].add(d.name)
+                if tag in owner:
+                    g = gacc.setdefault((t, owner[tag]), {"track": t, "group": owner[tag], "types": set(), "gaps": 0, "no": 0,
+                                                          "partial": 0, "must_weighted": 0, "members": {}, "_w": {}, "_tables": set()})
+                    g["types"].add(typ)
+                    g["gaps"] += 1
+                    g[status] += 1
+                    g["must_weighted"] += 2 if must == "must" else 1
+                    g["members"][tag] = g["members"].get(tag, 0) + 1
+                    g["_w"][tag] = g["_w"].get(tag, 0) + (2 if must == "must" else 1)
+                    g["_tables"].add(d.name)
+    for (t, _), g in gacc.items():
+        g["tables"] = len(g.pop("_tables"))
+        w = g.pop("_w")
+        g["top_member"] = min(g["members"], key=lambda m: (-w[m], -g["members"][m], m))
+        types = g.pop("types")
+        g["type"] = types.pop() if len(types) == 1 else "mixed"
+        res["groups"].append(g)
+    res["groups"].sort(key=lambda g: (g["track"], -g["must_weighted"], -g["gaps"], g["group"]))
     for (t, _), e in acc.items():
         e["tables"] = len(e.pop("_tables"))
         res["tracks"][t].append(e)
@@ -116,25 +163,28 @@ def check_plan(res, plan_text):
             continue
         seen += 1
         track, tag, gaps, weighted, offers = m.group(1), m.group(2), *(int(x) for x in m.groups()[2:])
-        e = next((e for e in res["tracks"][track] if e["tag"] == tag), None)
+        e = next((e for e in res["tracks"][track] if e["tag"] == tag), None) or next(
+            (g for g in res["groups"] if g["track"] == track and g["group"] == tag), None)
         if e is None or (e["gaps"], e["must_weighted"], e["tables"]) != (gaps, weighted, offers):
             bad.append(f"{track}/{tag}")
     return bad if seen else ["no gap rows found"]
 
 
 def main(argv):
-    plan, pos, k = None, [], 0
+    plan, groups, pos, k = None, None, [], 0
     while k < len(argv):
         if argv[k] == "--check" and k + 1 < len(argv):
             plan, k = argv[k + 1], k + 2
+        elif argv[k] == "--groups" and k + 1 < len(argv):
+            groups, k = argv[k + 1], k + 2
         else:
             pos.append(argv[k])
             k += 1
     if len(pos) != 2:
-        print("usage: pipeline.py gap-count APPLICATIONS_DIR TAG_TRACKS_FILE [--check PLAN_FILE]", file=sys.stderr)
+        print("usage: pipeline.py gap-count APPLICATIONS_DIR TAG_TRACKS_FILE [--groups FILE] [--check PLAN_FILE]", file=sys.stderr)
         return 64
     try:
-        r = count(pos[0], pos[1])
+        r = count(pos[0], pos[1], groups)
         bad = check_plan(r, pathlib.Path(plan).read_text()) if plan else None
     except (OSError, ValueError) as e:
         print(e)

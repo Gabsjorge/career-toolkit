@@ -1,0 +1,5 @@
+# Default tag groups for gap-count. Copy to <career_folder>/state/tag-groups.txt and edit.
+# Line format: group = member, member, ... (two or more tags that appear in the tag-to-track map).
+# A group is a view on top of the member tags: members keep their own ranking and nothing in your data changes.
+# Most Offers ask for "a cloud", not a specific one, so the group shows the merged gap and the top member.
+cloud = aws, gcp, azure
