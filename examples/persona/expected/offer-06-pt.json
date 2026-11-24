@@ -1,0 +1,37 @@
+{
+  "offer": "offer-06-pt.md",
+  "language": "pt",
+  "requirements": [
+    {
+      "tag": "leadership",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "mentoring",
+      "priority": "must",
+      "status": "Partial"
+    },
+    {
+      "tag": "system-design",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "typescript",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "code-review",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "availability",
+      "priority": "nice",
+      "status": "Not evidenced"
+    }
+  ],
+  "injection_markers": []
+}

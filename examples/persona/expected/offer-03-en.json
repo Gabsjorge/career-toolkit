@@ -1,0 +1,42 @@
+{
+  "offer": "offer-03-en.md",
+  "language": "en",
+  "requirements": [
+    {
+      "tag": "ci-cd",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "github-actions",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "terraform",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "aws",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "docker",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "code-review",
+      "priority": "nice",
+      "status": "Yes"
+    },
+    {
+      "tag": "remote",
+      "priority": "nice",
+      "status": "Not evidenced"
+    }
+  ],
+  "injection_markers": []
+}

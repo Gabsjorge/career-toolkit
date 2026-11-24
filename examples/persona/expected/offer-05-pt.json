@@ -1,0 +1,37 @@
+{
+  "offer": "offer-05-pt.md",
+  "language": "pt",
+  "requirements": [
+    {
+      "tag": "java",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "spring",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "microservices",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "sql",
+      "priority": "must",
+      "status": "Partial"
+    },
+    {
+      "tag": "mysql",
+      "priority": "nice",
+      "status": "Partial"
+    },
+    {
+      "tag": "english",
+      "priority": "nice",
+      "status": "Not evidenced"
+    }
+  ],
+  "injection_markers": []
+}

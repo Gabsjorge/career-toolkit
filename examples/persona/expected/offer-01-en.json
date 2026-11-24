@@ -1,0 +1,47 @@
+{
+  "offer": "offer-01-en.md",
+  "language": "en",
+  "requirements": [
+    {
+      "tag": "typescript",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "nestjs",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "kafka",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "postgresql",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "kubernetes",
+      "priority": "must",
+      "status": "Partial"
+    },
+    {
+      "tag": "terraform",
+      "priority": "nice",
+      "status": "No"
+    },
+    {
+      "tag": "redis",
+      "priority": "nice",
+      "status": "Yes"
+    },
+    {
+      "tag": "mentoring",
+      "priority": "nice",
+      "status": "Partial"
+    }
+  ],
+  "injection_markers": []
+}

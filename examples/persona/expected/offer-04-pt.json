@@ -1,0 +1,37 @@
+{
+  "offer": "offer-04-pt.md",
+  "language": "pt",
+  "requirements": [
+    {
+      "tag": "senior",
+      "priority": "must",
+      "status": "Not evidenced"
+    },
+    {
+      "tag": "nestjs",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "kafka",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "postgresql",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "event-driven",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "rabbitmq",
+      "priority": "nice",
+      "status": "Partial"
+    }
+  ],
+  "injection_markers": []
+}

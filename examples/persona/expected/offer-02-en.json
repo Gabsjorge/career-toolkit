@@ -1,0 +1,37 @@
+{
+  "offer": "offer-02-en.md",
+  "language": "en",
+  "requirements": [
+    {
+      "tag": "python",
+      "priority": "must",
+      "status": "No"
+    },
+    {
+      "tag": "postgresql",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "docker",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "rest",
+      "priority": "must",
+      "status": "Yes"
+    },
+    {
+      "tag": "redis",
+      "priority": "nice",
+      "status": "Yes"
+    },
+    {
+      "tag": "kubernetes",
+      "priority": "nice",
+      "status": "Partial"
+    }
+  ],
+  "injection_markers": []
+}
