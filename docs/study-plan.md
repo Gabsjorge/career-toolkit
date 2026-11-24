@@ -21,7 +21,7 @@ The first run writes `<career_folder>/docs/study-plan.md` and leaves your own `l
 
 | Command | What it does |
 |---|---|
-| `gap-count APPS TRACKS [--check PLAN]` (`scripts/gap_count.py`) | Reads `APPS/*/fit-table.md` and prints JSON per track: `tag`, `type`, `gaps`, `no`, `partial`, `must_weighted`, `tables` (how many Offers asked for it). With `--check`, compares the number rows of a plan (`\| track \| tag \| gaps \| weighted \| offers \|`) with the counted values and prints `OK` or the `track/tag` that differ. Exit 1 on a bad tag map, a missing folder or a mismatch. |
+| `gap-count APPS TRACKS [--groups FILE] [--check PLAN]` (`scripts/gap_count.py`) | Reads `APPS/*/fit-table.md` and prints JSON per track: `tag`, `type`, `gaps`, `no`, `partial`, `must_weighted`, `tables` (how many Offers asked for it). With `--check`, compares the number rows of a plan (`\| track \| tag \| gaps \| weighted \| offers \|`) with the counted values and prints `OK` or the `track/tag` that differ. Exit 1 on a bad tag map, a missing folder or a mismatch. |
 
 ## What counts as a gap
 
@@ -30,6 +30,8 @@ The first run writes `<career_folder>/docs/study-plan.md` and leaves your own `l
 - The JSON also holds `tables_read`, `tables_skipped` (a table that cannot be read whole, by folder name), `rows`, `untagged_rows` and `unmapped_tags`. Nothing is guessed: a tag with no track is listed, not assigned.
 
 ## The track map
+
+A tag group (`templates/tag-groups.default.txt`, copied once to `<career_folder>/state/tag-groups.txt`) merges related tags into one extra view. The default is `cloud = aws, gcp, azure`: most Offers ask for "a cloud", not one provider, so the plan shows the merged gap and the provider to learn first. With `--groups FILE`, the JSON gets a `groups` list with one entry per track and group: `gaps`, `no`, `partial`, `must_weighted`, `tables` (each Offer counted once even if it names two providers), `members` (gaps per tag) and `top_member` (most weighted gaps, then most gaps, then name). The `tracks` list is unchanged, so every provider keeps its own ranking and no Evidence or Fit table is touched. A group row in a plan (`| backend | cloud | gaps | weighted | offers |`) is checked like a tag row. Without `--groups`, `groups` is empty.
 
 `templates/tag-tracks.default.txt` is copied once to `<career_folder>/state/tag-tracks.txt`, which you edit. One line per tag: `tag = track, type`.
 
