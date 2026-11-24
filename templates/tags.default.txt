@@ -77,6 +77,8 @@ remote
 availability
 relocation
 contract
+location
+long-term
 [aliases]
 k8s=kubernetes
 node=nodejs

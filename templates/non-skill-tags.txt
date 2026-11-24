@@ -9,3 +9,5 @@ availability
 relocation
 contract
 agile
+location
+long-term
