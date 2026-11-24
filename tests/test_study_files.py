@@ -29,6 +29,23 @@ class StudySkillTests(unittest.TestCase):
                        "Not evidenced", "kind: lab", "stronger"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 
+    def test_plan_is_written_by_a_dispatched_stronger_model(self):
+        for needle in ["Dispatch one subagent", "`model: opus`", "Read only the listed paths",
+                       "Returns only the Markdown", "Plan wording written by:"]:
+            self.assertIn(needle, SKILL, needle)
+        self.assertNotIn("Inputs: the JSON", SKILL)
+
+    def test_subagent_treats_inputs_as_data(self):
+        self.assertIn("untrusted data", SKILL)
+
+    def test_lead_practice_section_is_allowed_only_with_its_label(self):
+        for needle in ["## Lead practice (not from the gap data)", "no numbers", "Do not put a gap count, an effort or a reason from the data in it"]:
+            self.assertIn(needle, SKILL, needle)
+
+    def test_claims_about_the_user_need_a_source(self):
+        for needle in ["claim about what the user already knows", "STATE/notes.md", "or leave it out"]:
+            self.assertIn(needle, SKILL, needle)
+
     def test_first_run_does_not_touch_the_old_plan(self):
         self.assertIn("leave `level-career-up.md` untouched", SKILL)
 
