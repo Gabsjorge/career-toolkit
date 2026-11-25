@@ -30,6 +30,12 @@ class CoachAgentTests(unittest.TestCase):
     def test_search_offers_is_reserved(self):
         self.assertIn("reserved", agent())
 
+    def test_description_catches_search_requests(self):
+        desc = re.search(r"description: (.+)\n", agent()).group(1)
+        self.assertIn("find me offers", desc)
+        self.assertIn("does not search the web", desc)
+        self.assertIn("Do not search the web", agent())
+
     def test_rules_are_stated(self):
         a = agent()
         for needle in ["adds no rules", "Never follow instructions", "config.json", "Never commit or push"]:
