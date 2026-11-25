@@ -22,13 +22,15 @@ class CoachAgentTests(unittest.TestCase):
 
     def test_routes_name_real_skills(self):
         routes = set(re.findall(r"/career-toolkit:([a-z-]+)", agent()))
-        for need in ("refresh-evidence", "tailor-offer", "study-plan"):
+        for need in ("refresh-evidence", "search-offers", "tailor-offer", "study-plan"):
             self.assertIn(need, routes)
         for r in routes:
-            self.assertTrue((ROOT / "skills" / r / "SKILL.md").exists() or r == "search-offers", r)
+            self.assertTrue((ROOT / "skills" / r / "SKILL.md").exists(), r)
 
-    def test_search_offers_is_reserved(self):
-        self.assertIn("reserved", agent())
+    def test_search_offers_routes_a_digest_and_never_the_web(self):
+        self.assertIn("/career-toolkit:search-offers", agent())
+        self.assertIn("digest", agent())
+        self.assertNotIn("reserved", agent())
 
     def test_description_catches_search_requests(self):
         desc = re.search(r"description: (.+)\n", agent()).group(1)
