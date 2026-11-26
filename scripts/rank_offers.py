@@ -3,6 +3,7 @@
 Input JSON: {"offers": [{"slug", "title", "company", "url" (string or null), "requirements": [{"requirement", "tag", "priority"}]}]}
 Status per row comes from fit_status.derive. Score = weighted credit over rows whose Status is not "Not evidenced":
 weight Must 2, Nice 1; credit Yes 1, Partial 0.5, No 0. A row with an unknown tag stops the run (exit 1) so the user can rule on it.
+An Offer scored from fewer than MIN_ROWS rows is "thin" and sorts after the others. company may be missing.
 Offers with the same URL, or the same company and title, count once (the first one stays).
 """
 import json, math, os, pathlib, re, sys
@@ -12,6 +13,7 @@ import evidence, fit_status, tags as taglib
 SLUG = re.compile(r"[a-z0-9][a-z0-9-]*\Z")
 WEIGHT = {"must": 2, "nice": 1}
 CREDIT = {"Yes": 1.0, "Partial": 0.5, "No": 0.0}
+MIN_ROWS = 4   # an Offer scored from fewer rows is "thin": its score is a weak signal and it sorts after the others
 STATUSES = ("Yes", "Partial", "No", "Not evidenced")
 
 
@@ -27,7 +29,7 @@ def _validate(data):
     for n, o in enumerate(data["offers"], 1):
         if not isinstance(o, dict):
             raise ValueError(f"offer {n}: not an object")
-        for f in ("slug", "title", "company"):
+        for f in ("slug", "title"):
             if not (isinstance(o.get(f), str) and o[f].strip()):
                 raise ValueError(f"offer {n}: field '{f}' must be a non-empty string")
         if not SLUG.match(o["slug"]):
@@ -35,6 +37,8 @@ def _validate(data):
         if o["slug"] in seen:
             raise ValueError(f"offer {n}: field 'slug' is repeated")
         seen.add(o["slug"])
+        if o.get("company") is not None and not (isinstance(o["company"], str) and o["company"].strip()):
+            raise ValueError(f"offer {n}: field 'company' must be a non-empty string or null")
         if o.get("url") is not None and not isinstance(o["url"], str):
             raise ValueError(f"offer {n}: field 'url' must be a string or null")
         if not isinstance(o.get("requirements"), list):
@@ -63,19 +67,21 @@ def rank(offers_path, evidence_path, tags_path, relations_path=None, non_skill_p
     non_skill = fit_status.load_non_skill(non_skill_path or fit_status.DEFAULT_NON_SKILL)
     urls, names, kept, duplicates, unknown = set(), set(), [], [], {}
     for o in data["offers"]:
-        name = (_norm(o["company"]), _norm(o["title"]))
+        name = (_norm(o["company"]), _norm(o["title"])) if o.get("company") else None
         url = o.get("url").strip() if o.get("url") else None
-        if (url and url in urls) or name in names:
+        if (url and url in urls) or (name and name in names):
             duplicates.append(o["slug"])
             continue
         if url:
             urls.add(url)
-        names.add(name)
+        if name:
+            names.add(name)
         kept.append(o)
     ranked = []
     for o in kept:
         counts = dict.fromkeys(STATUSES, 0)
         got = den = 0.0
+        rows = 0
         no_gap = partial_gap = None
         for r in o["requirements"]:
             canon = taglib.resolve(r["tag"], tags, aliases)
@@ -88,6 +94,7 @@ def rank(offers_path, evidence_path, tags_path, relations_path=None, non_skill_p
             counts[status] += 1
             if status == fit_status.NOT_EVIDENCED:
                 continue
+            rows += 1
             w = WEIGHT[r["priority"]]
             den += w
             got += w * CREDIT[status]
@@ -96,10 +103,11 @@ def rank(offers_path, evidence_path, tags_path, relations_path=None, non_skill_p
                     no_gap = canon
                 elif status == "Partial" and partial_gap is None:
                     partial_gap = canon
-        ranked.append({"slug": o["slug"], "title": o["title"], "company": o["company"], "url": o.get("url"),
+        ranked.append({"slug": o["slug"], "title": o["title"], "company": o.get("company"), "url": o.get("url"),
                        "score": _percent(got / den) if den else None, "counts": counts,
+                       "rows": rows, "thin": rows < MIN_ROWS,
                        "gap": no_gap or partial_gap})
-    ranked.sort(key=lambda x: (x["score"] is None, -(x["score"] or 0)))   # stable: ties keep input order
+    ranked.sort(key=lambda x: (x["thin"], x["score"] is None, -(x["score"] or 0)))   # stable: ties keep input order
     return {"ranked": ranked, "duplicates": duplicates, "unknown": unknown}
 
 
@@ -108,13 +116,15 @@ def _cell(s):
 
 
 def render(res):
-    lines = ["| Rank | Offer | Title | Company | Score | Yes | Partial | No | Not evidenced | Biggest Must gap | URL |",
-             "|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines = ["| Rank | Offer | Title | Company | Score | Rows | Yes | Partial | No | Not evidenced | Biggest Must gap | URL |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for n, o in enumerate(res["ranked"], 1):
         c = o["counts"]
         score = f"{o['score']}%" if o["score"] is not None else "—"
+        if o["thin"]:
+            score += " (thin)"
         lines.append("| " + " | ".join(_cell(x) for x in (
-            n, o["slug"], o["title"], o["company"], score, c["Yes"], c["Partial"], c["No"], c["Not evidenced"],
+            n, o["slug"], o["title"], o["company"] or "—", score, o["rows"], c["Yes"], c["Partial"], c["No"], c["Not evidenced"],
             o["gap"] or "—", o["url"] or "—")) + " |")
     lines += ["", f"{len(res['ranked'])} Offers ranked, {len(res['duplicates'])} duplicates dropped"
               + (f" ({', '.join(res['duplicates'])})" if res["duplicates"] else "") + "."]

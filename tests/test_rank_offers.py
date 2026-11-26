@@ -68,6 +68,39 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(r["ranked"][0]["score"], 100)
 
 
+class ThinAndCompanyTests(unittest.TestCase):
+    def test_thin_offer_sorts_after_a_solid_one(self):
+        solid = offer("solid", [req("kafka"), req("go"), req("nestjs", "nice"), req("go", "nice")])   # 4 scored rows, 50%
+        thin = offer("thin", [req("kafka"), req("nestjs")])   # 2 scored rows, 100%
+        r = rank([thin, solid])
+        self.assertEqual([o["slug"] for o in r["ranked"]], ["solid", "thin"])
+        self.assertEqual([o["thin"] for o in r["ranked"]], [False, True])
+        self.assertEqual(r["ranked"][1]["rows"], 2)
+
+    def test_rows_exclude_not_evidenced(self):
+        r = rank([offer("a", [req("kafka"), req("remote")])], tg=TAGS + "remote\n")
+        self.assertEqual(r["ranked"][0]["rows"], 1)
+
+    def test_missing_company_is_allowed_and_not_deduped_together(self):
+        a, b = offer("a", [req("kafka")], title="Dev"), offer("b", [req("go")], title="Dev")
+        for o in (a, b):
+            o.pop("company")
+        r = rank([a, b])
+        self.assertEqual(r["duplicates"], [])
+        self.assertEqual(r["ranked"][0]["company"], None)
+
+    def test_render_shows_rows_and_thin_marker(self):
+        r = rank([offer("a", [req("kafka")])])
+        self.assertIn("| 1 | a | T a | C | 100% (thin) | 1 |", rank_offers.render(r))
+
+    def test_company_of_wrong_type_is_a_named_error(self):
+        o = offer("a", [req("kafka")])
+        o["company"] = 5
+        with self.assertRaises(ValueError) as cm:
+            rank_offers.rank(tmp(json.dumps({"offers": [o]}), "o.json"), tmp(EV), tmp(TAGS))
+        self.assertIn("company", str(cm.exception))
+
+
 class DedupTests(unittest.TestCase):
     def test_same_url_is_dropped(self):
         r = rank([offer("a", [req("kafka")], url="https://x.example/1"),
@@ -118,7 +151,7 @@ class CliTests(unittest.TestCase):
         dest = o.parent / "sub" / "short.md"
         code, out, _ = self.run_cli(o, tmp(EV), tmp(TAGS), "--out", dest)
         self.assertEqual(code, 0)
-        self.assertIn("| 1 | a | Dev | Acme | 100% |", dest.read_text())
+        self.assertIn("| 1 | a | Dev | Acme | 100% (thin) |", dest.read_text())
         self.assertNotIn("| 1 | a |", out)
         self.assertEqual(oct(dest.stat().st_mode)[-3:], "600")
 
@@ -149,6 +182,7 @@ class PersonaTests(unittest.TestCase):
         r = rank_offers.rank(P / "offers.json", P / "evidence.example.md", ROOT / "templates" / "tags.default.txt")
         self.assertEqual([(o["slug"], o["score"], o["gap"]) for o in r["ranked"]],
                          [("acme-backend", 100, None), ("beta-platform", 40, "terraform"), ("gamma-data", 33, "go")])
+        self.assertEqual([o["thin"] for o in r["ranked"]], [False, True, True])
         self.assertEqual(r["duplicates"], ["acme-backend-repost"])
         self.assertEqual(r["unknown"], {})
 

@@ -32,6 +32,8 @@ The Offers JSON is `{"offers": [{"slug", "title", "company", "url", "requirement
 - Not evidenced rows (seniority, language level, remote and so on) are left out of the score, because Evidence cannot show them. If every row is Not evidenced the score is `—` and the Offer sorts last.
 - Score = credit earned divided by weight possible, as a percent. Ties keep the digest order.
 - Biggest Must gap: the first Must row with Status No, else the first with Partial.
+- An Offer scored from fewer than 4 rows is `(thin)`: it sorts after the others, because a score from two requirements is a weak signal. The `Rows` column shows how many rows were scored.
+- Work-mode and level tags (`onsite`, `hybrid`, `mid-level`, `remote`, `senior`) are in `templates/non-skill-tags.txt`, so they read Not evidenced instead of a gap. `company` may be null.
 - Offers with the same URL, or the same company and title, count once.
 
 The score says how much of an Offer your Evidence supports. It does not say the Offer is good. Untagged Evidence lowers scores; run `tag-evidence` first (see [refresh-evidence](refresh-evidence.md)).

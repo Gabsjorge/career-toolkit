@@ -79,6 +79,10 @@ relocation
 contract
 location
 long-term
+onsite
+hybrid
+mid-level
+
 [aliases]
 k8s=kubernetes
 node=nodejs

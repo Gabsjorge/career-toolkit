@@ -29,6 +29,10 @@ class SearchSkillTests(unittest.TestCase):
                        "CAREER/offers/", "Not evidenced", "runs on a `client` and a `personal` machine", "Do not call a model without"]:
             self.assertIn(needle.lower(), SKILL.lower(), needle)
 
+    def test_user_approves_tags_and_thin_offers_are_flagged(self):
+        for needle in ["Never approve a tag yourself", "one list", "non-skill-tags.txt", "(thin)", "Never invent a company", "or null"]:
+            self.assertIn(needle, SKILL, needle)
+
     def test_never_reads_private_files(self):
         self.assertIn("Never read, print or summarize `STATE/config.json`", SKILL)
 
