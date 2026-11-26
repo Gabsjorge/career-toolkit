@@ -1,0 +1,21 @@
+{"offers": [
+  {"slug": "acme-backend", "title": "Backend Engineer", "company": "Acme Pay", "url": "https://jobs.example.com/acme/101",
+   "requirements": [
+     {"requirement": "TypeScript", "tag": "typescript", "priority": "must"},
+     {"requirement": "NestJS services", "tag": "nestjs", "priority": "must"},
+     {"requirement": "Kafka consumers", "tag": "kafka", "priority": "must"},
+     {"requirement": "PostgreSQL", "tag": "postgresql", "priority": "must"}]},
+  {"slug": "beta-platform", "title": "Platform Engineer", "company": "Beta Cloud", "url": "https://jobs.example.com/beta/202",
+   "requirements": [
+     {"requirement": "Kubernetes in production", "tag": "kubernetes", "priority": "must"},
+     {"requirement": "Terraform", "tag": "terraform", "priority": "must"},
+     {"requirement": "Docker", "tag": "docker", "priority": "nice"}]},
+  {"slug": "gamma-data", "title": "Data Engineer", "company": "Gamma Data", "url": null,
+   "requirements": [
+     {"requirement": "Go services", "tag": "go", "priority": "must"},
+     {"requirement": "Redis", "tag": "redis", "priority": "nice"},
+     {"requirement": "Fully remote", "tag": "remote", "priority": "nice"}]},
+  {"slug": "acme-backend-repost", "title": "Backend  Engineer", "company": "ACME Pay", "url": "https://jobs.example.com/acme/101",
+   "requirements": [
+     {"requirement": "TypeScript", "tag": "typescript", "priority": "must"}]}
+]}

@@ -11,3 +11,6 @@ contract
 agile
 location
 long-term
+onsite
+hybrid
+mid-level

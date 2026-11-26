@@ -15,7 +15,7 @@ Terms such as Offer, Evidence and Fit table are defined in [CONTEXT.md](CONTEXT.
 | `study-plan` | available; see [docs/study-plan.md](docs/study-plan.md) |
 | `career-coach` (agent) | available; routes to the skills, see [docs/career-coach.md](docs/career-coach.md) |
 | evals | manual evals on the demo persona; see [docs/evals.md](docs/evals.md) and [evals/README.md](evals/README.md) |
-| `search-offers` | reserved |
+| `search-offers` | available; ranks a pasted digest of Offers by Fit, see [docs/search-offers.md](docs/search-offers.md) |
 
 ## Prerequisites
 
@@ -57,8 +57,9 @@ Want to see the flow before using real data? The fictional persona in `examples/
 Inside Claude Code, either describe your task and let the `career-coach` agent pick the skill ("I got a job offer", "what should I study?"), or call a skill directly. In order:
 
 1. **`/career-toolkit:refresh-evidence`** builds and updates your Evidence (IDs, tags) and proposes CV and letter edits from recent work. Do this first, because tailoring needs Evidence. Details: [docs/refresh-evidence.md](docs/refresh-evidence.md).
-2. **`/career-toolkit:tailor-offer`**: paste an Offer or a URL. You get `fit-table.md`, `cv-<lang>.md` and `cover-letter-<lang>.md` in `<career_folder>/applications/<slug>/`. Details: [docs/tailor-offer.md](docs/tailor-offer.md).
-3. **`/career-toolkit:study-plan`** reads all your Fit tables and writes `<career_folder>/docs/study-plan.md` with two tracks. Details: [docs/study-plan.md](docs/study-plan.md).
+2. **`/career-toolkit:search-offers`**: paste a digest of several Offers (for example a job-alert email). You get a ranked shortlist in `<career_folder>/offers/shortlist-<date>.md`, scored by how much of each Offer your Evidence supports. Nothing is searched or fetched. Details: [docs/search-offers.md](docs/search-offers.md).
+3. **`/career-toolkit:tailor-offer`**: paste an Offer or a URL. You get `fit-table.md`, `cv-<lang>.md` and `cover-letter-<lang>.md` in `<career_folder>/applications/<slug>/`. Details: [docs/tailor-offer.md](docs/tailor-offer.md).
+4. **`/career-toolkit:study-plan`** reads all your Fit tables and writes `<career_folder>/docs/study-plan.md` with two tracks. Details: [docs/study-plan.md](docs/study-plan.md).
 
 What to expect: each skill shows a token estimate before a model step and stops over the cap; scripts, not the model, set Fit Status and count gaps; you approve every CV bullet that has no Evidence ID; Claude never commits or pushes for you.
 

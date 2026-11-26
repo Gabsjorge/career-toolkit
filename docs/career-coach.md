@@ -7,7 +7,8 @@ A thin Claude Code agent (`agents/career-coach.md`) for when you have a career t
 | "Update my Evidence / CV from recent work" | `/career-toolkit:refresh-evidence` ([docs](refresh-evidence.md)) |
 | "I got this offer" (paste text or a URL) | `/career-toolkit:tailor-offer` ([docs](tailor-offer.md)) |
 | "What should I study?" | `/career-toolkit:study-plan` ([docs](study-plan.md)) |
-| "Find me offers" | nothing yet: `search-offers` is reserved |
+| "Rank these offers" (paste a digest) | `/career-toolkit:search-offers` ([docs](search-offers.md)) |
+| "Find me offers" | no web search: it asks you to paste a digest for `search-offers` |
 
 ## What it does not do
 
